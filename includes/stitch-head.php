@@ -133,6 +133,16 @@ tailwind.config = {
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;1,400&amp;family=Montserrat:wght@300;400;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="<?= e(base_url('assets/css/public-overrides.css')) ?>?v=4"/>
+<link rel="stylesheet" href="<?= e(asset_url('assets/css/public-overrides.css')) ?>"/>
+<?php
+if (!empty($pageStylesheets) && is_array($pageStylesheets)) {
+    foreach ($pageStylesheets as $sheet) {
+        if (!is_string($sheet) || $sheet === '') {
+            continue;
+        }
+        echo '<link rel="stylesheet" href="' . e($sheet) . '"/>' . "\n";
+    }
+}
+?>
 </head>
 <body class="bg-background font-body-md text-on-surface<?= !empty($bodyClass) ? ' ' . e((string) $bodyClass) : '' ?>">

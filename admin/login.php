@@ -72,6 +72,18 @@ $appName = site_name();
             </div>
             <button class="admin-btn" type="submit">Sign in</button>
         </form>
+
+        <?php if (admin_setup_enabled() || admin_password_reset_enabled()): ?>
+            <div class="admin-auth__links" style="margin-top:1.25rem;display:flex;flex-direction:column;gap:0.5rem;font-size:0.875rem;">
+                <?php if (admin_setup_enabled()): ?>
+                    <a href="<?= e(base_url('admin/setup.php')) ?>">Create or update admin account</a>
+                <?php endif; ?>
+                <?php if (admin_password_reset_enabled()): ?>
+                    <a href="<?= e(base_url('admin/reset-password.php')) ?>">Reset admin password</a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
         <p class="admin-auth__foot"><a href="<?= e(base_url('index.php')) ?>">Exit to site</a></p>
     </div>
 </div>

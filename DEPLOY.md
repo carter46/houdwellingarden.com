@@ -56,22 +56,16 @@ Committed `config.php` defaults are already production-safe. Secrets belong only
 
 After seed, update `settings` via **Admin → Website Settings** (site name, phone, email, logo, favicon). Do not hardcode branding in templates.
 
-Existing databases upgrading from an earlier Phase 8 tree must run:
+**Existing databases:** deploy new PHP code and load Admin or any public page once. `includes/schema-migrate.php` applies pending schema steps (tracked in `settings.schema_version`). Do **not** re-import `schema.sql` on a live DB.
 
-```bash
-mysql -u USER -p real_estate < database/migrations_release_gate.sql
-```
-
-(Ignore duplicate-column errors if columns already exist.)
+See `database/SQL-DEPLOY-GUIDE.txt` for the full HouGarden workflow.
 
 
 ## 4. Database
 
-**Shared hosting (phpMyAdmin):** create the DB in the hosting panel first, open that database in phpMyAdmin, then Import `database/schema.sql`, then `database/seed.sql`. Do not run `CREATE DATABASE` — your user is not allowed to create DBs. Put the panel DB name/user/password in `config.local.php`.
+**Shared hosting (phpMyAdmin):** create the DB in the hosting panel first, open that database in phpMyAdmin, then Import **`database/hougarden-deploy.sql`** (schema + all HouGarden AU listings + image paths + settings). Upload `uploads/properties/hg-*` with the site zip. Do **not** import `schema.sql` alone — it has no listings. Regenerate the deploy file after local data changes: `php scripts/export-hougarden-deploy-sql.php`. See `database/SQL-DEPLOY-GUIDE.txt`.
 
-If listings already exist without photos, also import `database/migrations_seed_images.sql` (needs `uploads/properties/{slug}/` demo folders).  
-If agents lack portraits, import `database/migrations_agent_photos.sql` (needs `assets/img/agent-*.jpg`).  
-If the `regions` table is missing, import `database/migrations_regions.sql`.
+Do not run `CREATE DATABASE` in phpMyAdmin if your host forbids it — use the panel DB name in `config.local.php`.
 
 **CLI (full privileges):**
 

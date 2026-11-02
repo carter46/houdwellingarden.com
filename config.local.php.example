@@ -50,4 +50,10 @@ return [
     'smartsupp' => [
         'key' => '',
     ],
+
+    // Turn on while creating or recovering admin, then set both back to false.
+    'admin' => [
+        'setup_enabled' => true,
+        'password_reset_enabled' => true,
+    ],
 ];

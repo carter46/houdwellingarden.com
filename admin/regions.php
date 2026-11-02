@@ -154,7 +154,7 @@ require dirname(__DIR__) . '/includes/admin-header.php';
 <div class="admin-panel">
   <h2>All regions</h2>
   <?php if ($rows === []): ?>
-    <p class="admin-note">No regions yet. Import <code>migrations_regions.sql</code> (and <code>migrations_regions_home.sql</code> if upgrading) or use “Add region”.</p>
+    <p class="admin-note">No regions yet. Use “Add region” or import data manually — schema is created by <code>database/schema.sql</code>.</p>
   <?php else: ?>
     <table class="admin-table">
       <thead><tr><th></th><th>Name</th><th>Sort</th><th>Homepage</th><th>Status</th><th>In use</th><th></th></tr></thead>

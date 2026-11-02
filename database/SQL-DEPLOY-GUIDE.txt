@@ -1,0 +1,29 @@
+HouGarden — phpMyAdmin deploy (simple)
+======================================
+
+1. Upload the whole site (zip) including uploads/properties/hg-* folders.
+
+2. phpMyAdmin → select your InfinityFree database → Import ONE file:
+
+     database/hougarden-deploy.sql
+
+   That file has tables + all 33 AU listings + images rows + settings.
+   Do NOT use schema.sql alone — that is structure-only (empty listings).
+
+3. Set MySQL credentials in config.php or config.local.php on the server.
+
+4. Visit admin/setup.php → create admin password.
+
+5. Done.
+
+Regenerate hougarden-deploy.sql (after you change listings locally)
+--------------------------------------------------------------------
+  php scripts/apply-hougarden-manifest.php
+  php scripts/seed-property-galleries.php
+  php scripts/export-hougarden-deploy-sql.php
+
+Other files
+-----------
+  schema.sql       — developers / empty install only
+  seed.sql         — old Colorado demo bits (not HouGarden listings)
+  hougarden-deploy.sql — what you import on InfinityFree

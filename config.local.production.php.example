@@ -9,7 +9,8 @@ return [
     'app' => [
         'env' => 'production',
         'debug' => false,
-        'url' => 'https://YOUR_DOMAIN',
+        // No trailing slash. Must match the host where this site runs (not localhost).
+        'url' => 'https://houdwellingarden.gt.tc',
         'name' => 'Sunview Development and Consultancy (SDC)',
         'timezone' => 'America/Denver',
     ],

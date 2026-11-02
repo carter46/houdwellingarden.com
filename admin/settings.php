@@ -103,11 +103,44 @@ if (is_post()) {
                 $errors[] = 'Phone is too long.';
             }
 
+            $smartsuppKey = trim((string) ($_POST['smartsupp_key'] ?? ''));
+            $aboutIntro = trim((string) ($_POST['about_intro'] ?? ''));
+            $aboutMission = trim((string) ($_POST['about_mission'] ?? ''));
+            $aboutHeroTitle = trim((string) ($_POST['about_hero_title'] ?? ''));
+            $aboutHeroLead = trim((string) ($_POST['about_hero_lead'] ?? ''));
+            $aboutStatsJson = trim((string) ($_POST['about_stats_json'] ?? ''));
+            $faqJson = trim((string) ($_POST['faq_json'] ?? ''));
+
+            if ($aboutStatsJson !== '') {
+                $decodedStats = json_decode($aboutStatsJson, true);
+                if (!is_array($decodedStats)) {
+                    $errors[] = 'About stats must be valid JSON (array of {value, label}).';
+                }
+            }
+            if ($faqJson !== '') {
+                $decodedFaq = json_decode($faqJson, true);
+                if (!is_array($decodedFaq)) {
+                    $errors[] = 'FAQ content must be valid JSON (array of groups with title and items).';
+                }
+            }
+
             if ($errors === []) {
                 setting_set('site_name', $name);
                 setting_set('site_phone', $phone !== '' ? $phone : null);
                 setting_set('site_email', $email !== '' ? $email : null);
                 setting_set('mail_from_name', $mailFrom !== '' ? $mailFrom : null);
+
+                setting_set('smartsupp_key', $smartsuppKey !== '' ? $smartsuppKey : null);
+                setting_set_bool('smartsupp_enabled', !empty($_POST['smartsupp_enabled']));
+                setting_set_bool('property_show_agent', !empty($_POST['property_show_agent']));
+                setting_set_bool('property_show_inquiry', !empty($_POST['property_show_inquiry']));
+
+                setting_set('about_intro', $aboutIntro !== '' ? $aboutIntro : null);
+                setting_set('about_mission', $aboutMission !== '' ? $aboutMission : null);
+                setting_set('about_hero_title', $aboutHeroTitle !== '' ? $aboutHeroTitle : null);
+                setting_set('about_hero_lead', $aboutHeroLead !== '' ? $aboutHeroLead : null);
+                setting_set('about_stats_json', $aboutStatsJson !== '' ? $aboutStatsJson : null);
+                setting_set('faq_json', $faqJson !== '' ? $faqJson : null);
 
                 if (!empty($_FILES['logo']['name'])) {
                     $prev = setting_get('site_logo_path');
@@ -176,8 +209,58 @@ require dirname(__DIR__) . '/includes/admin-header.php';
   <div class="admin-field">
     <label for="site_email">Public email</label>
     <input id="site_email" name="site_email" type="email" maxlength="191" value="<?= e(site_email()) ?>">
-    <p class="admin-note">Also used as inquiry notify fallback when mail.admin_notify_email is empty.</p>
+    <p class="admin-note">Shown in the footer, Contact page, and as inquiry notify fallback when mail.admin_notify_email is empty.</p>
   </div>
+
+  <h2 style="margin:1.5rem 0 0.75rem;font-size:1.1rem;">Property detail page</h2>
+  <div class="admin-field">
+    <label><input type="checkbox" name="property_show_agent" value="1" <?= property_page_show_agent() ? 'checked' : '' ?>> Show listing agent block</label>
+  </div>
+  <div class="admin-field">
+    <label><input type="checkbox" name="property_show_inquiry" value="1" <?= property_page_show_inquiry_form() ? 'checked' : '' ?>> Show property enquiry form</label>
+    <p class="admin-note">When hidden, Enquire buttons link to the Contact page instead.</p>
+  </div>
+
+  <h2 style="margin:1.5rem 0 0.75rem;font-size:1.1rem;">Smartsupp live chat</h2>
+  <div class="admin-field">
+    <label><input type="checkbox" name="smartsupp_enabled" value="1" <?= setting_bool('smartsupp_enabled', true) ? 'checked' : '' ?>> Enable chat widget on public HouGarden pages</label>
+  </div>
+  <div class="admin-field">
+    <label for="smartsupp_key">Smartsupp key</label>
+    <input id="smartsupp_key" name="smartsupp_key" maxlength="120" value="<?= e((string) (setting_get('smartsupp_key') ?? '')) ?>" placeholder="Leave blank to use config smartsupp.key">
+    <p class="admin-note">Get the key from Smartsupp → Settings → Chat box → Chat code. DB value overrides config.</p>
+  </div>
+
+  <h2 style="margin:1.5rem 0 0.75rem;font-size:1.1rem;">About page content</h2>
+  <div class="admin-field">
+    <label for="about_hero_title">Hero title</label>
+    <input id="about_hero_title" name="about_hero_title" maxlength="191" value="<?= e((string) (setting_get('about_hero_title') ?? '')) ?>">
+  </div>
+  <div class="admin-field">
+    <label for="about_hero_lead">Hero lead</label>
+    <input id="about_hero_lead" name="about_hero_lead" maxlength="500" value="<?= e((string) (setting_get('about_hero_lead') ?? '')) ?>">
+  </div>
+  <div class="admin-field">
+    <label for="about_intro">Intro paragraph</label>
+    <textarea id="about_intro" name="about_intro" rows="3"><?= e((string) (setting_get('about_intro') ?? '')) ?></textarea>
+  </div>
+  <div class="admin-field">
+    <label for="about_mission">Mission paragraph</label>
+    <textarea id="about_mission" name="about_mission" rows="3"><?= e((string) (setting_get('about_mission') ?? '')) ?></textarea>
+  </div>
+  <div class="admin-field">
+    <label for="about_stats_json">Stats (JSON)</label>
+    <textarea id="about_stats_json" name="about_stats_json" rows="4" placeholder='[{"value":"20+","label":"Live listings"}]'><?= e((string) (setting_get('about_stats_json') ?? '')) ?></textarea>
+    <p class="admin-note">Optional. Leave blank to auto-use live listing count and default labels.</p>
+  </div>
+
+  <h2 style="margin:1.5rem 0 0.75rem;font-size:1.1rem;">FAQ page content</h2>
+  <div class="admin-field">
+    <label for="faq_json">FAQ groups (JSON)</label>
+    <textarea id="faq_json" name="faq_json" rows="8" placeholder='[{"title":"Buying","items":[{"q":"…","a":"…"}]}]'><?= e((string) (setting_get('faq_json') ?? '')) ?></textarea>
+    <p class="admin-note">Optional. Leave blank for built-in <?= e(site_name()) ?> defaults.</p>
+  </div>
+
   <div class="admin-field">
     <label>Current logo</label>
     <p><img src="<?= e(site_logo_url()) ?>" alt="" style="max-height:48px;background:#fff;padding:4px;"></p>

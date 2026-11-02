@@ -444,6 +444,23 @@ function property_validate_input(array $input, ?int $excludeId = null): array
         $listedAt = null;
     }
 
+    $existing = $excludeId ? property_find($excludeId) : null;
+    $currency = strtoupper(trim((string) ($input['currency'] ?? '')));
+    if (!preg_match('/^[A-Z]{3}$/', $currency)) {
+        $currency = strtoupper(trim((string) ($existing['currency'] ?? 'AUD')));
+        if (!preg_match('/^[A-Z]{3}$/', $currency)) {
+            $currency = 'AUD';
+        }
+    }
+    $country = trim((string) ($input['country'] ?? ''));
+    if ($country === '') {
+        $country = trim((string) ($existing['country'] ?? 'Australia')) ?: 'Australia';
+    }
+    $state = trim((string) ($input['state'] ?? ''));
+    if ($state === '') {
+        $state = trim((string) ($existing['state'] ?? 'NSW')) ?: 'NSW';
+    }
+
     $amenityIds = [];
     if (!empty($input['amenities']) && is_array($input['amenities'])) {
         foreach ($input['amenities'] as $aid) {
@@ -463,13 +480,13 @@ function property_validate_input(array $input, ?int $excludeId = null): array
         'status' => $status,
         'price' => $priceOnRequest ? null : $price,
         'price_on_request' => $priceOnRequest,
-        'currency' => 'USD',
+        'currency' => $currency,
         'address_line' => $address,
         'city' => $city,
         'region' => trim((string) ($input['region'] ?? '')),
-        'state' => trim((string) ($input['state'] ?? 'CO')) ?: 'CO',
+        'state' => $state,
         'postal_code' => trim((string) ($input['postal_code'] ?? '')),
-        'country' => trim((string) ($input['country'] ?? 'USA')) ?: 'USA',
+        'country' => $country,
         'bedrooms' => $beds,
         'bathrooms' => $baths,
         'sqft' => $sqft,
@@ -477,6 +494,9 @@ function property_validate_input(array $input, ?int $excludeId = null): array
         'year_built' => $year,
         'badge' => trim((string) ($input['badge'] ?? '')) ?: null,
         'is_featured' => !empty($input['is_featured']) ? 1 : 0,
+        'is_home_recommend' => !empty($input['is_home_recommend']) ? 1 : 0,
+        'is_home_watched' => !empty($input['is_home_watched']) ? 1 : 0,
+        'is_home_saved' => !empty($input['is_home_saved']) ? 1 : 0,
         'agent_id' => $agentId,
         'agent_quote' => trim((string) ($input['agent_quote'] ?? '')) ?: null,
         'listed_at' => $listedAt,
@@ -501,10 +521,12 @@ function property_insert(array $data, int $userId): int
         'INSERT INTO properties (
             slug, reference_code, mls_number, title, description, property_type_id, listing_purpose,
             status, price, price_on_request, currency, address_line, city, region, state, postal_code, country,
-            bedrooms, bathrooms, sqft, lot_acres, year_built, badge, is_featured, agent_id, agent_quote,
+            bedrooms, bathrooms, sqft, lot_acres, year_built, badge, is_featured,
+            is_home_recommend, is_home_watched, is_home_saved,
+            agent_id, agent_quote,
             listed_at, source_name, source_url, source_reference, created_by
          ) VALUES (
-            ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+            ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
          )'
     );
     $stmt->execute([
@@ -532,6 +554,9 @@ function property_insert(array $data, int $userId): int
         $data['year_built'],
         $data['badge'],
         $data['is_featured'],
+        $data['is_home_recommend'] ?? 0,
+        $data['is_home_watched'] ?? 0,
+        $data['is_home_saved'] ?? 0,
         $data['agent_id'],
         $data['agent_quote'],
         $data['listed_at'],
@@ -556,7 +581,8 @@ function property_update(int $id, array $data): void
             listing_purpose = ?, status = ?, price = ?, price_on_request = ?, currency = ?,
             address_line = ?, city = ?, region = ?, state = ?, postal_code = ?, country = ?,
             bedrooms = ?, bathrooms = ?, sqft = ?, lot_acres = ?, year_built = ?, badge = ?,
-            is_featured = ?, agent_id = ?, agent_quote = ?, listed_at = ?
+            is_featured = ?, is_home_recommend = ?, is_home_watched = ?, is_home_saved = ?,
+            agent_id = ?, agent_quote = ?, listed_at = ?
          WHERE id = ?'
     );
     $stmt->execute([
@@ -584,6 +610,9 @@ function property_update(int $id, array $data): void
         $data['year_built'],
         $data['badge'],
         $data['is_featured'],
+        $data['is_home_recommend'] ?? 0,
+        $data['is_home_watched'] ?? 0,
+        $data['is_home_saved'] ?? 0,
         $data['agent_id'],
         $data['agent_quote'],
         $data['listed_at'],
@@ -908,6 +937,20 @@ function property_public_where_sql(array $filters = []): array
         $where[] = 'p.is_featured = 1';
     }
 
+    $homeFeed = trim((string) ($filters['home_feed'] ?? ''));
+    if ($homeFeed === 'recommend') {
+        $where[] = 'p.is_home_recommend = 1';
+    } elseif ($homeFeed === 'watched') {
+        $where[] = 'p.is_home_watched = 1';
+    } elseif ($homeFeed === 'saved') {
+        $where[] = 'p.is_home_saved = 1';
+    }
+
+    $market = trim((string) ($filters['market'] ?? ''));
+    if ($market === 'victoria') {
+        $where[] = "p.state = 'VIC' AND p.city NOT IN ('South Yarra', 'Ocean Grove')";
+    }
+
     return [implode(' AND ', $where), $params];
 }
 
@@ -928,10 +971,13 @@ function property_list_public(array $filters = [], string $sort = 'newest', int 
     [$where, $params] = property_public_where_sql($filters);
     $order = property_public_order_sql($sort);
     $sql = "SELECT p.*, t.name AS type_name, t.slug AS type_slug,
+            a.name AS agent_name, a.photo_path AS agent_photo, a.badge AS agent_badge,
             (SELECT path FROM property_images pi WHERE pi.property_id = p.id AND pi.is_cover = 1 ORDER BY pi.id ASC LIMIT 1) AS cover_path,
-            (SELECT path FROM property_images pi2 WHERE pi2.property_id = p.id ORDER BY pi2.is_cover DESC, pi2.sort_order ASC, pi2.id ASC LIMIT 1) AS image_path
+            (SELECT path FROM property_images pi2 WHERE pi2.property_id = p.id ORDER BY pi2.is_cover DESC, pi2.sort_order ASC, pi2.id ASC LIMIT 1) AS image_path,
+            (SELECT COUNT(*) FROM property_images pic WHERE pic.property_id = p.id) AS image_count
             FROM properties p
             LEFT JOIN property_types t ON t.id = p.property_type_id
+            LEFT JOIN agents a ON a.id = p.agent_id
             WHERE $where
             ORDER BY $order
             LIMIT " . (int) $limit . ' OFFSET ' . (int) $offset;

@@ -6,15 +6,17 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/hougarden-shell.php';
 
 $slug = trim((string) ($_GET['slug'] ?? ''));
 if ($slug === '') {
     http_response_code(404);
     $pageTitle = 'Property not found';
     $activeNav = 'properties';
-    require __DIR__ . '/includes/header.php';
+    hougarden_use_public_shell('search');
+    require __DIR__ . '/includes/header-hougarden.php';
     echo '<p class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop py-24 font-body-lg text-on-surface-variant">Property not found.</p>';
-    require __DIR__ . '/includes/footer.php';
+    require __DIR__ . '/includes/footer-hougarden.php';
     exit;
 }
 
@@ -35,9 +37,10 @@ if (!$property) {
     http_response_code(404);
     $pageTitle = 'Property not found';
     $activeNav = 'properties';
-    require __DIR__ . '/includes/header.php';
+    hougarden_use_public_shell('search');
+    require __DIR__ . '/includes/header-hougarden.php';
     echo '<p class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop py-24 font-body-lg text-on-surface-variant">This property is not available.</p>';
-    require __DIR__ . '/includes/footer.php';
+    require __DIR__ . '/includes/footer-hougarden.php';
     exit;
 }
 
@@ -59,8 +62,7 @@ $priceLabel = format_price(
 );
 $locationEyebrow = trim(($property['city'] ?? '') . (($property['state'] ?? '') !== '' ? ', ' . $property['state'] : ''));
 $pageTitle = (string) $property['title'] . ' — ' . site_name();
-$activeNav = 'properties';
-$bodyClass = 'property-detail-page';
+hougarden_use_public_shell('search', 'property-detail-page');
 
 $byCat = [];
 foreach ($amenities as $am) {
@@ -127,261 +129,9 @@ if (is_post() && ($_POST['form'] ?? '') === 'property_inquiry') {
 $coverUrl = $cover !== '' ? media_url($cover) : '';
 $contactHref = base_url('contact.php?property=' . rawurlencode((string) $property['slug']));
 
-require __DIR__ . '/includes/header.php';
+require __DIR__ . '/includes/header-hougarden.php';
+require __DIR__ . '/includes/partials/property-detail-hougarden.php';
 ?>
-<section class="relative w-full h-[80vh] min-h-[600px] flex items-end pb-16 pt-32 -mt-20 overflow-hidden">
-  <div class="absolute inset-0 z-0 bg-black">
-    <?php if ($coverUrl !== ''): ?>
-      <img alt="" class="w-full h-full object-cover opacity-80" src="<?= e($coverUrl) ?>"/>
-    <?php else: ?>
-      <div class="w-full h-full img-placeholder opacity-80"></div>
-    <?php endif; ?>
-    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent mix-blend-multiply"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-  </div>
-  <div class="relative z-10 max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop w-full text-on-primary">
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
-      <div class="max-w-3xl">
-        <p class="font-subheading text-subheading uppercase tracking-[0.2em] mb-4 text-primary-fixed-dim/90"><?= e($locationEyebrow !== '' ? $locationEyebrow : 'Colorado') ?></p>
-        <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg mb-6 leading-tight"><?= e((string) $property['title']) ?></h1>
-        <div class="inline-block bg-primary/80 backdrop-blur-md px-6 py-2 border border-outline-variant/30">
-          <span class="font-body-lg text-body-lg text-on-primary tracking-wide"><?= e($priceLabel) ?></span>
-        </div>
-      </div>
-      <div class="flex gap-4 md:flex-col md:text-right">
-        <a href="#inquiry" class="js-scroll-inquiry bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm px-8 py-4 hover:bg-primary-fixed-dim transition-colors uppercase tracking-widest inline-flex items-center justify-center gap-2 no-underline">
-          Buy Now <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-        </a>
-        <a href="<?= e($contactHref) ?>" class="bg-transparent border border-on-primary/30 text-on-primary font-label-sm text-label-sm px-8 py-4 hover:bg-on-primary/10 transition-colors uppercase tracking-widest text-center no-underline">
-          Request Details
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="w-full bg-surface-container-low border-b border-outline-variant/20 py-8">
-  <div class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop">
-    <div class="flex flex-wrap items-center justify-between gap-8 md:gap-12">
-      <div class="flex items-center gap-4">
-        <span class="material-symbols-outlined text-primary text-2xl font-light">bed</span>
-        <div>
-          <p class="font-headline-md text-headline-md text-primary leading-none"><?= e($property['bedrooms'] !== null ? (string) $property['bedrooms'] : '—') ?></p>
-          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">BEDROOMS</p>
-        </div>
-      </div>
-      <div class="hidden md:block w-px h-12 bg-outline-variant/40"></div>
-      <div class="flex items-center gap-4">
-        <span class="material-symbols-outlined text-primary text-2xl font-light">shower</span>
-        <div>
-          <p class="font-headline-md text-headline-md text-primary leading-none"><?= e($property['bathrooms'] !== null ? (string) $property['bathrooms'] : '—') ?></p>
-          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">BATHROOMS</p>
-        </div>
-      </div>
-      <div class="hidden md:block w-px h-12 bg-outline-variant/40"></div>
-      <div class="flex items-center gap-4">
-        <span class="material-symbols-outlined text-primary text-2xl font-light">square_foot</span>
-        <div>
-          <p class="font-headline-md text-headline-md text-primary leading-none"><?= e($property['sqft'] !== null ? number_format((int) $property['sqft']) : '—') ?></p>
-          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">SQ FT</p>
-        </div>
-      </div>
-      <div class="hidden md:block w-px h-12 bg-outline-variant/40"></div>
-      <div class="flex items-center gap-4">
-        <span class="material-symbols-outlined text-primary text-2xl font-light">landscape</span>
-        <div>
-          <p class="font-headline-md text-headline-md text-primary leading-none"><?= e($property['lot_acres'] !== null ? (string) $property['lot_acres'] : '—') ?></p>
-          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">ACRES</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="w-full py-section-gap">
-  <div class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
-      <div class="lg:col-span-8 flex flex-col gap-16">
-        <div class="pr-0 md:pr-12">
-          <p class="font-subheading text-subheading text-primary mb-6 flex items-center gap-4">
-            <span class="w-12 h-px bg-primary"></span> THE VISION
-          </p>
-          <h2 class="font-display-lg text-display-lg-mobile text-on-surface mb-8"><?= e((string) $property['title']) ?></h2>
-          <div class="font-body-lg text-body-lg text-on-surface-variant whitespace-pre-line"><?= e((string) ($property['description'] ?? '')) ?></div>
-        </div>
-
-        <div>
-          <p class="font-subheading text-subheading text-primary mb-8 flex items-center gap-4">
-            <span class="w-12 h-px bg-primary"></span> GALLERY
-          </p>
-          <?php if ($images === []): ?>
-            <p class="font-body-md text-on-surface-variant">No gallery images yet.</p>
-          <?php else: ?>
-            <?php require __DIR__ . '/includes/property-gallery.php'; ?>
-          <?php endif; ?>
-        </div>
-
-        <div>
-          <p class="font-subheading text-subheading text-primary mb-8 flex items-center gap-4">
-            <span class="w-12 h-px bg-primary"></span> AMENITIES &amp; FEATURES
-          </p>
-          <?php if ($byCat === []): ?>
-            <p class="font-body-md text-on-surface-variant">Amenities will appear here when assigned in admin.</p>
-          <?php else: ?>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-              <?php foreach ($byCat as $cat => $items): ?>
-                <div>
-                  <h4 class="font-display-lg text-2xl text-on-surface mb-4"><?= e((string) $cat) ?></h4>
-                  <ul class="flex flex-col gap-3">
-                    <?php foreach ($items as $item): ?>
-                      <li class="flex items-start gap-3 py-2 border-b border-outline-variant/30">
-                        <span class="material-symbols-outlined text-primary text-[18px] mt-1">done</span>
-                        <span class="font-body-md text-body-md text-on-surface-variant"><?= e((string) $item['name']) ?></span>
-                      </li>
-                    <?php endforeach; ?>
-                  </ul>
-                </div>
-              <?php endforeach; ?>
-            </div>
-          <?php endif; ?>
-        </div>
-      </div>
-
-      <div class="lg:col-span-4">
-        <div class="flex flex-col gap-8 h-full">
-          <div class="bg-surface-container p-8 shadow-sm border border-outline-variant/20 flex flex-col items-center text-center">
-            <?php
-              $agentPhotoUrl = agent_photo_url(
-                  isset($property['agent_photo']) ? (string) $property['agent_photo'] : null,
-                  isset($property['agent_slug']) ? (string) $property['agent_slug'] : null
-              );
-            ?>
-            <?php if ($agentPhotoUrl !== ''): ?>
-              <div class="w-32 h-32 rounded-full overflow-hidden mb-6 border-4 border-surface">
-                <img class="w-full h-full object-cover" src="<?= e($agentPhotoUrl) ?>" alt="<?= e((string) ($property['agent_name'] ?? '')) ?>">
-              </div>
-            <?php else: ?>
-              <div class="w-32 h-32 rounded-full mb-6 border-4 border-surface img-placeholder" aria-hidden="true"></div>
-            <?php endif; ?>
-            <p class="font-label-sm text-label-sm text-primary tracking-widest uppercase mb-2"><?= e((string) ($property['agent_badge'] ?? 'Listing Agent')) ?></p>
-            <h3 class="font-headline-md text-headline-md text-on-surface mb-1"><?= e((string) ($property['agent_name'] ?? 'SDC Advisors')) ?></h3>
-            <p class="font-label-sm text-label-sm text-on-surface-variant tracking-widest uppercase mb-6">
-              <?= e(trim(($property['agent_title'] ?? '') . (($property['agent_region'] ?? '') !== '' ? ', ' . $property['agent_region'] : ''))) ?>
-            </p>
-            <div class="w-12 h-px bg-outline-variant/50 mb-6"></div>
-            <?php if (!empty($property['agent_quote'])): ?>
-              <p class="font-body-md text-body-md text-on-surface-variant mb-8 italic">“<?= e((string) $property['agent_quote']) ?>”</p>
-            <?php endif; ?>
-            <div class="w-full flex flex-col gap-4">
-              <a href="#inquiry" class="js-scroll-inquiry w-full bg-primary text-on-primary font-label-sm text-label-sm py-4 hover:bg-primary-container transition-colors uppercase tracking-widest inline-flex items-center justify-center gap-2 no-underline">
-                <span class="material-symbols-outlined text-[18px]">shopping_bag</span> Buy Now
-              </a>
-              <a href="#inquiry" class="js-scroll-inquiry w-full bg-transparent border border-primary text-primary font-label-sm text-label-sm py-4 hover:bg-primary/5 transition-colors uppercase tracking-widest inline-flex items-center justify-center gap-2 no-underline">
-                <span class="material-symbols-outlined text-[18px]">mail</span> Request Details
-              </a>
-            </div>
-            <p class="mt-6 font-label-sm text-label-sm text-on-surface-variant">Ref <?= e((string) $property['reference_code']) ?><?= !empty($property['mls_number']) ? ' · MLS# ' . e((string) $property['mls_number']) : '' ?></p>
-          </div>
-
-          <div id="inquiry" class="property-inquiry-card bg-surface-container-lowest border border-outline-variant/30 p-6 lg:sticky lg:top-28 lg:z-10">
-            <p class="font-subheading text-subheading text-primary mb-3 uppercase tracking-widest">Inquire</p>
-            <h3 class="font-headline-md text-[24px] text-on-surface mb-4">Request a private purchase</h3>
-            <?php if ($inquirySuccess): ?>
-              <p class="font-body-md text-on-surface-variant">Inquiry received. An SDC advisor will follow up shortly.</p>
-            <?php else: ?>
-              <?php foreach ($inquiryErrors as $err): ?>
-                <p class="font-body-md text-error mb-2"><?= e($err) ?></p>
-              <?php endforeach; ?>
-              <form method="post" action="#inquiry" class="flex flex-col gap-5">
-                <?= csrf_field() ?>
-                <?= honeypot_field() ?>
-                <input type="hidden" name="form" value="property_inquiry">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div class="relative pt-5">
-                    <label class="absolute top-0 left-0 font-label-sm text-label-sm text-on-surface-variant uppercase" for="inq_first">First Name *</label>
-                    <input id="inq_first" name="first_name" required value="<?= e($inquiryForm['first_name']) ?>" class="w-full bg-transparent border-0 border-b border-outline-variant/50 focus:border-primary py-2 font-body-md outline-none">
-                  </div>
-                  <div class="relative pt-5">
-                    <label class="absolute top-0 left-0 font-label-sm text-label-sm text-on-surface-variant uppercase" for="inq_last">Last Name *</label>
-                    <input id="inq_last" name="last_name" required value="<?= e($inquiryForm['last_name']) ?>" class="w-full bg-transparent border-0 border-b border-outline-variant/50 focus:border-primary py-2 font-body-md outline-none">
-                  </div>
-                </div>
-                <div class="relative pt-5">
-                  <label class="absolute top-0 left-0 font-label-sm text-label-sm text-on-surface-variant uppercase" for="inq_email">Email *</label>
-                  <input id="inq_email" name="email" type="email" required value="<?= e($inquiryForm['email']) ?>" class="w-full bg-transparent border-0 border-b border-outline-variant/50 focus:border-primary py-2 font-body-md outline-none">
-                </div>
-                <div class="relative pt-5">
-                  <label class="absolute top-0 left-0 font-label-sm text-label-sm text-on-surface-variant uppercase" for="inq_phone">Phone</label>
-                  <input id="inq_phone" name="phone" type="tel" value="<?= e($inquiryForm['phone']) ?>" class="w-full bg-transparent border-0 border-b border-outline-variant/50 focus:border-primary py-2 font-body-md outline-none">
-                </div>
-                <div class="relative pt-5">
-                  <label class="absolute top-0 left-0 font-label-sm text-label-sm text-on-surface-variant uppercase" for="inq_interest">Interest</label>
-                  <select id="inq_interest" name="interest" class="w-full bg-transparent border-0 border-b border-outline-variant/50 focus:border-primary py-2 font-body-md outline-none">
-                    <?php foreach (['Buy Now', 'Request Details', 'General Inquiry'] as $opt): ?>
-                      <option value="<?= e($opt) ?>" <?= $inquiryForm['interest'] === $opt ? 'selected' : '' ?>><?= e($opt) ?></option>
-                    <?php endforeach; ?>
-                  </select>
-                </div>
-                <div class="relative pt-5">
-                  <label class="absolute top-0 left-0 font-label-sm text-label-sm text-on-surface-variant uppercase" for="inq_message">Message *</label>
-                  <textarea id="inq_message" name="message" rows="4" required class="w-full bg-transparent border-0 border-b border-outline-variant/50 focus:border-primary py-2 font-body-md outline-none resize-none"><?= e($inquiryForm['message']) ?></textarea>
-                </div>
-                <button type="submit" class="bg-primary text-on-primary font-label-sm text-label-sm uppercase tracking-widest px-8 py-3 hover:bg-primary-container transition-colors">Send Inquiry</button>
-              </form>
-            <?php endif; ?>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="property-mobile-cta lg:hidden" id="property-mobile-cta" role="region" aria-label="Property actions">
-  <div class="property-mobile-cta__inner">
-    <div class="property-mobile-cta__price">
-      <p class="property-mobile-cta__price-label">Price</p>
-      <p class="property-mobile-cta__price-value"><?= e($priceLabel) ?></p>
-    </div>
-    <div class="property-mobile-cta__actions">
-      <a href="#inquiry" class="js-scroll-inquiry property-mobile-cta__btn property-mobile-cta__btn--primary">Enquire</a>
-      <a href="#inquiry" class="js-scroll-inquiry property-mobile-cta__btn property-mobile-cta__btn--ghost">Buy</a>
-    </div>
-  </div>
-</div>
-
-<script>
-(function () {
-  var inquiry = document.getElementById('inquiry');
-  var bar = document.getElementById('property-mobile-cta');
-  if (!inquiry) return;
-
-  function scrollToInquiry(e) {
-    if (e) e.preventDefault();
-    var top = inquiry.getBoundingClientRect().top + window.pageYOffset - 96;
-    window.scrollTo({ top: top, behavior: 'smooth' });
-    try {
-      history.replaceState(null, '', '#inquiry');
-    } catch (err) {}
-    var focusEl = inquiry.querySelector('input, textarea, select, button');
-    if (focusEl) {
-      window.setTimeout(function () { focusEl.focus({ preventScroll: true }); }, 400);
-    }
-  }
-
-  document.querySelectorAll('.js-scroll-inquiry').forEach(function (link) {
-    link.addEventListener('click', scrollToInquiry);
-  });
-
-  if (bar && 'IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) bar.classList.add('is-hidden');
-        else bar.classList.remove('is-hidden');
-      });
-    }, { root: null, threshold: 0.15 });
-    io.observe(inquiry);
-  }
-})();
-</script>
+<div class="pb-16"></div>
 <?php
-require __DIR__ . '/includes/footer.php';
+require __DIR__ . '/includes/footer-hougarden.php';

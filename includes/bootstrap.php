@@ -72,6 +72,7 @@ require_once APP_ROOT . '/includes/helpers.php';
 require_once APP_ROOT . '/includes/security_headers.php';
 require_once APP_ROOT . '/includes/db.php';
 require_once APP_ROOT . '/includes/settings.php';
+require_once APP_ROOT . '/includes/site-features.php';
 require_once APP_ROOT . '/includes/visibility.php';
 require_once APP_ROOT . '/includes/csrf.php';
 require_once APP_ROOT . '/includes/rate_limit.php';
@@ -79,13 +80,17 @@ require_once APP_ROOT . '/includes/auth.php';
 require_once APP_ROOT . '/includes/mailer.php';
 require_once APP_ROOT . '/includes/properties.php';
 require_once APP_ROOT . '/includes/taxonomy.php';
+require_once APP_ROOT . '/includes/image-optimize.php';
 require_once APP_ROOT . '/includes/uploads.php';
 require_once APP_ROOT . '/includes/inquiries.php';
+require_once APP_ROOT . '/includes/schema-migrate.php';
 
 security_headers_send();
 
 // Start session early so CSRF / flash work on public and admin requests.
 auth_session_start();
+
+app_run_schema_migrations();
 
 /**
  * @return array<string, mixed>

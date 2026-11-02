@@ -11,7 +11,8 @@ $root = __DIR__;
 echo "PHP: " . PHP_VERSION . "\n";
 echo "Root: " . $root . "\n";
 echo "config.php: " . (is_readable($root . '/config.php') ? 'yes' : 'NO') . "\n";
-echo "config.local.php: " . (is_readable($root . '/config.local.php') ? 'yes' : 'MISSING — upload it') . "\n";
+$hasLocal = is_readable($root . '/config.local.php');
+echo "config.local.php: " . ($hasLocal ? 'yes (OVERRIDES config.php db/app settings)' : 'no — using config.php only') . "\n";
 echo "vendor/autoload.php: " . (is_readable($root . '/vendor/autoload.php') ? 'yes' : 'MISSING — redeploy so Composer runs') . "\n";
 echo "pdo_mysql: " . (extension_loaded('pdo_mysql') ? 'yes' : 'NO') . "\n";
 echo "curl: " . (function_exists('curl_init') ? 'yes' : 'no') . "\n";
@@ -19,8 +20,12 @@ echo "curl: " . (function_exists('curl_init') ? 'yes' : 'no') . "\n";
 try {
     $config = require $root . '/config.php';
     echo "config load: ok\n";
-    echo "app.url: " . ($config['app']['url'] ?? '') . "\n";
+    echo "app.url (config): " . ($config['app']['url'] ?? '') . "\n";
+    if (!empty($_SERVER['HTTP_HOST'])) {
+        echo "HTTP_HOST: " . $_SERVER['HTTP_HOST'] . "\n";
+    }
     echo "app.env: " . ($config['app']['env'] ?? '') . "\n";
+    echo "db.host: " . ($config['db']['host'] ?? '') . "\n";
     echo "db.name: " . ($config['db']['name'] ?? '') . "\n";
     echo "db.user: " . ($config['db']['user'] ?? '') . "\n";
     echo "mail.driver: " . ($config['mail']['driver'] ?? '') . "\n";
@@ -45,6 +50,16 @@ try {
     echo "db connect: ok (properties={$n})\n";
 } catch (Throwable $e) {
     echo "db connect FAILED: " . $e->getMessage() . "\n";
+}
+
+if (!empty($_SERVER['HTTP_HOST']) && !preg_match('/^(localhost|127\.0\.0\.1)(:\d+)?$/i', (string) $_SERVER['HTTP_HOST'])) {
+    $dbHost = (string) ($config['db']['host'] ?? '');
+    $dbUser = (string) ($config['db']['user'] ?? '');
+    if ($dbHost === '127.0.0.1' || $dbUser === 'root') {
+        echo "\nWARNING: Database still uses local defaults (127.0.0.1 / root).\n";
+        echo "If you edited config.php on the server, config.local.php from your PC may be overriding it.\n";
+        echo "Fix: delete or replace config.local.php on the server, or use config.infinityfree.php.example.\n";
+    }
 }
 
 echo "\nDone. Delete check.php when finished.\n";

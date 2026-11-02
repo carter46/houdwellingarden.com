@@ -19,14 +19,15 @@ try {
 }
 
 $pageTitle = 'Markets — ' . site_name();
-$activeNav = '';
-require __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/hougarden-shell.php';
+hougarden_use_public_shell('search');
+require __DIR__ . '/includes/header-hougarden.php';
 ?>
-<section class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop pt-16 pb-8">
-  <span class="font-subheading text-subheading text-primary uppercase tracking-widest mb-4 block">Destinations</span>
-  <h1 class="font-display-lg text-display-lg-mobile lg:text-display-lg text-on-surface mb-6">All Markets</h1>
-  <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl font-light">Browse every SDC market. Select a destination to view available properties in that region.</p>
-</section>
+<div class="hg-page-head">
+  <p class="hg-page-head__eyebrow">Destinations</p>
+  <h1 class="hg-page-head__title">All markets</h1>
+  <p class="hg-page-head__lead">Browse every region. Select a destination to view available properties.</p>
+</div>
 
 <section class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop pb-20">
   <?php if (!$dbOk): ?>
@@ -41,4 +42,4 @@ require __DIR__ . '/includes/header.php';
     </div>
   <?php endif; ?>
 </section>
-<?php require __DIR__ . '/includes/footer.php'; ?>
+<?php require __DIR__ . '/includes/footer-hougarden.php'; ?>

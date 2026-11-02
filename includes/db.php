@@ -25,11 +25,16 @@ function db(): PDO
 
     $dsn = sprintf('mysql:host=%s;port=%d;dbname=%s;charset=%s', $host, $port, $name, $charset);
 
-    $pdo = new PDO($dsn, $user, $pass, [
+    $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
-    ]);
+    ];
+    if (defined('PDO::MYSQL_ATTR_CONNECT_TIMEOUT')) {
+        $options[PDO::MYSQL_ATTR_CONNECT_TIMEOUT] = 3;
+    }
+
+    $pdo = new PDO($dsn, $user, $pass, $options);
 
     return $pdo;
 }

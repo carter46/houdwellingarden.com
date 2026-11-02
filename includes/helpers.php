@@ -17,11 +17,65 @@ function slugify(string $text): string
     return trim($text, '-') ?: 'item';
 }
 
+/**
+ * Same-origin path for links and static assets (InfinityFree-friendly, like /css/styles.css).
+ * On the web server this is always relative to the current host — no app.url required.
+ */
 function base_url(string $path = ''): string
 {
+    $path = ltrim(str_replace('\\', '/', $path), '/');
+    if (PHP_SAPI !== 'cli' && !empty($_SERVER['HTTP_HOST'])) {
+        return $path === '' ? '/' : '/' . $path;
+    }
+
     $base = rtrim((string) app_config('app.url', ''), '/');
-    $path = ltrim($path, '/');
+    if ($base === '') {
+        return $path === '' ? '/' : '/' . $path;
+    }
+
     return $path === '' ? $base : $base . '/' . $path;
+}
+
+/**
+ * Full https? URL for emails, webhooks, and CLI (uses current host on web requests).
+ */
+function absolute_url(string $path = ''): string
+{
+    $path = ltrim(str_replace('\\', '/', $path), '/');
+    $origin = rtrim(app_public_origin(), '/');
+
+    return $path === '' ? $origin . '/' : $origin . '/' . $path;
+}
+
+function app_public_origin(): string
+{
+    if (PHP_SAPI !== 'cli' && !empty($_SERVER['HTTP_HOST'])) {
+        $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
+            || (isset($_SERVER['SERVER_PORT']) && (string) $_SERVER['SERVER_PORT'] === '443');
+        $scheme = $https ? 'https' : 'http';
+        $host = preg_replace('/[^\w.\-:]/', '', (string) $_SERVER['HTTP_HOST']);
+
+        return $scheme . '://' . $host;
+    }
+
+    $configured = rtrim((string) app_config('app.url', ''), '/');
+
+    return $configured !== '' ? $configured : 'http://localhost';
+}
+
+/**
+ * Static asset under the site root with cache-busting filemtime (trust-offshore style).
+ */
+function asset_url(string $path): string
+{
+    $path = '/' . ltrim(str_replace('\\', '/', $path), '/');
+    $localPath = APP_ROOT . $path;
+    if (is_file($localPath)) {
+        return $path . '?v=' . (string) filemtime($localPath);
+    }
+
+    return $path;
 }
 
 /**
@@ -38,26 +92,26 @@ function redirect(string $path): never
 function redirect_safe_url(string $path): string
 {
     $path = trim($path);
-    $appBase = rtrim((string) app_config('app.url', ''), '/');
+    $appBase = rtrim(app_public_origin(), '/');
 
     if ($path === '') {
-        return $appBase !== '' ? $appBase . '/' : '/';
+        return base_url('');
     }
 
     // Protocol-relative or absolute external URLs are rejected unless under app.url.
     if (preg_match('#^(https?:)?//#i', $path) === 1) {
         if (preg_match('#^https?://#i', $path) !== 1) {
-            return $appBase !== '' ? $appBase . '/' : '/';
+            return base_url('');
         }
         if ($appBase !== '' && str_starts_with(strtolower($path), strtolower($appBase))) {
             return $path;
         }
-        return $appBase !== '' ? $appBase . '/' : '/';
+        return base_url('');
     }
 
     // Relative path only
     if (str_contains($path, "\n") || str_contains($path, "\r") || str_starts_with($path, '//')) {
-        return $appBase !== '' ? $appBase . '/' : '/';
+        return base_url('');
     }
 
     return base_url(ltrim($path, '/'));
@@ -89,8 +143,35 @@ function format_price(?float $price, bool $onRequest = false, string $currency =
         return 'Price Upon Request';
     }
 
-    $symbol = $currency === 'USD' ? '$' : $currency . ' ';
+    $currency = strtoupper(trim($currency));
+    $symbol = in_array($currency, ['USD', 'AUD', 'CAD', 'NZD'], true) ? '$' : $currency . ' ';
     return $symbol . number_format($price, 0, '.', ',');
+}
+
+/**
+ * Display floor area for listings (DB column is `sqft`; AU listings often store imperial ft²).
+ */
+function property_floor_area_label(array $property): string
+{
+    if (!isset($property['sqft']) || !is_numeric($property['sqft'])) {
+        return '';
+    }
+    $raw = (float) $property['sqft'];
+    if ($raw <= 0) {
+        return '';
+    }
+
+    $country = strtoupper(trim((string) ($property['country'] ?? '')));
+    $currency = strtoupper(trim((string) ($property['currency'] ?? '')));
+    $metric = in_array($country, ['AU', 'AUSTRALIA'], true) || $currency === 'AUD';
+
+    if ($metric) {
+        $m2 = $raw <= 400 ? $raw : $raw / 10.764;
+
+        return number_format((int) round($m2)) . ' m²';
+    }
+
+    return number_format((int) round($raw)) . ' sq ft';
 }
 
 /**

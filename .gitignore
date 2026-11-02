@@ -1,30 +1,16 @@
 # Local secrets — never commit
 /config.local.php
+/config.local.production.php
 
 # Composer dependencies — installed by the host on deploy (composer install)
 /vendor/
 
-# Runtime admin uploads ignored; committed demo + parent-company import folders under uploads/properties/
+# Property uploads: HouGarden AU uses uploads/properties/hg-{id}/ only.
+# Legacy Colorado / cc-* demo folders are not tracked.
 /uploads/properties/*
 !/uploads/properties/.gitkeep
-!/uploads/properties/450-red-mountain-rd/
-!/uploads/properties/450-red-mountain-rd/**
-!/uploads/properties/1220-vail-valley-dr/
-!/uploads/properties/1220-vail-valley-dr/**
-!/uploads/properties/88-strawberry-park/
-!/uploads/properties/88-strawberry-park/**
-!/uploads/properties/1240-red-mountain-road/
-!/uploads/properties/1240-red-mountain-road/**
-!/uploads/properties/450-gore-creek-drive/
-!/uploads/properties/450-gore-creek-drive/**
-!/uploads/properties/eagles-nest-ranch/
-!/uploads/properties/eagles-nest-ranch/**
-!/uploads/properties/the-apex-at-snowmass/
-!/uploads/properties/the-apex-at-snowmass/**
-!/uploads/properties/the-glass-house-at-red-mountain/
-!/uploads/properties/the-glass-house-at-red-mountain/**
-!/uploads/properties/cc-*/
-!/uploads/properties/cc-*/**
+!/uploads/properties/hg-*/
+!/uploads/properties/hg-*/**
 
 /uploads/branding/*
 !/uploads/branding/.gitkeep

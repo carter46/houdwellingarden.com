@@ -6,6 +6,8 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
+require_once dirname(__DIR__) . '/includes/hougarden-shell.php';
+hougarden_ensure_home_feed_columns();
 auth_require();
 
 $user = auth_user();
@@ -38,12 +40,13 @@ $defaults = [
     'status' => 'draft',
     'price' => '',
     'price_on_request' => 0,
+    'currency' => 'AUD',
     'address_line' => '',
     'city' => '',
     'region' => '',
-    'state' => 'CO',
+    'state' => 'NSW',
     'postal_code' => '',
-    'country' => 'USA',
+    'country' => 'Australia',
     'bedrooms' => '',
     'bathrooms' => '',
     'sqft' => '',
@@ -51,6 +54,9 @@ $defaults = [
     'year_built' => '',
     'badge' => '',
     'is_featured' => 0,
+    'is_home_recommend' => 0,
+    'is_home_watched' => 0,
+    'is_home_saved' => 0,
     'agent_id' => '',
     'agent_quote' => '',
     'listed_at' => date('Y-m-d'),
@@ -317,10 +323,26 @@ $canViewPublic = $isEdit && $viewSlug !== '' && is_property_status_public((strin
                 <label for="price">Listing Price</label>
                 <input id="price" name="price" type="text" value="<?= e((string) $form['price']) ?>" placeholder="0.00">
             </div>
-            <div class="admin-field" style="display:flex;align-items:flex-end;gap:1rem;padding-bottom:0.35rem;">
+            <div class="admin-field">
+                <label for="currency">Currency</label>
+                <select id="currency" name="currency">
+                    <?php foreach (['AUD' => 'AUD ($)', 'USD' => 'USD ($)', 'NZD' => 'NZD ($)'] as $code => $label): ?>
+                        <option value="<?= e($code) ?>" <?= strtoupper((string) $form['currency']) === $code ? 'selected' : '' ?>><?= e($label) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+        </div>
+        <div class="admin-grid-2">
+            <div class="admin-field" style="display:flex;align-items:flex-end;gap:1rem;padding-bottom:0.35rem;grid-column:1/-1;">
                 <label><input type="checkbox" name="price_on_request" value="1" <?= !empty($form['price_on_request']) ? 'checked' : '' ?>> Price upon request</label>
                 <label><input type="checkbox" name="is_featured" value="1" <?= !empty($form['is_featured']) ? 'checked' : '' ?>> Featured</label>
             </div>
+        </div>
+        <div class="admin-field" style="display:flex;flex-wrap:wrap;gap:1rem;padding-top:0.25rem;">
+            <span class="admin-label" style="width:100%;font-weight:600;">Homepage feeds</span>
+            <label><input type="checkbox" name="is_home_recommend" value="1" <?= !empty($form['is_home_recommend']) ? 'checked' : '' ?>> Recommend tab</label>
+            <label><input type="checkbox" name="is_home_watched" value="1" <?= !empty($form['is_home_watched']) ? 'checked' : '' ?>> Just watched tab</label>
+            <label><input type="checkbox" name="is_home_saved" value="1" <?= !empty($form['is_home_saved']) ? 'checked' : '' ?>> Saved tab</label>
         </div>
         <div class="admin-field">
             <label for="description">Description</label>
@@ -333,7 +355,11 @@ $canViewPublic = $isEdit && $viewSlug !== '' && is_property_status_public((strin
         <div class="admin-grid-3">
             <div class="admin-field"><label for="bedrooms">Bedrooms</label><input id="bedrooms" name="bedrooms" type="number" step="0.5" min="0" value="<?= e((string) $form['bedrooms']) ?>"></div>
             <div class="admin-field"><label for="bathrooms">Bathrooms</label><input id="bathrooms" name="bathrooms" type="number" step="0.5" min="0" value="<?= e((string) $form['bathrooms']) ?>"></div>
-            <div class="admin-field"><label for="sqft">Square Footage</label><input id="sqft" name="sqft" type="text" value="<?= e((string) $form['sqft']) ?>"></div>
+            <div class="admin-field">
+                <label for="sqft">Floor area</label>
+                <input id="sqft" name="sqft" type="text" value="<?= e((string) $form['sqft']) ?>" placeholder="e.g. 180 m² or 1940 ft²">
+                <p class="admin-note">Stored in the <code>sqft</code> column. For AU listings, enter square metres or square feet — the public site converts to m² when currency is AUD.</p>
+            </div>
             <div class="admin-field"><label for="lot_acres">Lot Size (Acres)</label><input id="lot_acres" name="lot_acres" type="text" value="<?= e((string) $form['lot_acres']) ?>"></div>
             <div class="admin-field"><label for="year_built">Year Built</label><input id="year_built" name="year_built" type="text" value="<?= e((string) $form['year_built']) ?>" placeholder="YYYY"></div>
         </div>

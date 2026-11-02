@@ -24,16 +24,17 @@ try {
     $regions = [];
 }
 $pageTitle = 'Our Experts — ' . site_name();
-$activeNav = 'agents';
-require __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/hougarden-shell.php';
+hougarden_use_public_shell('search');
+require __DIR__ . '/includes/header-hougarden.php';
 ?>
-<section class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop pt-16 pb-8">
-  <span class="font-subheading text-subheading text-primary uppercase tracking-widest mb-4 block">Meet the Network</span>
-  <h1 class="font-display-lg text-display-lg-mobile lg:text-display-lg text-on-surface mb-6">Our Experts</h1>
-  <p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl font-light">Meet the SDC specialists guiding Colorado’s most discerning buyers and sellers.</p>
-</section>
+<div class="hg-page-head">
+  <p class="hg-page-head__eyebrow">Agents</p>
+  <h1 class="hg-page-head__title">Our experts</h1>
+  <p class="hg-page-head__lead">Listing agents and advisors connected to every property in the database.</p>
+</div>
 
-<form method="get" action="" class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop pb-12">
+<form method="get" action="" class="hg-toolbar">
   <div class="max-w-sm">
   <label class="font-label-sm text-label-sm text-on-surface-variant uppercase mb-2 block" for="region">Region Filter</label>
   <select id="region" name="region" onchange="this.form.submit()" class="w-full appearance-none bg-surface-container border-b border-on-background/20 font-body-md text-body-md text-on-surface py-3 pl-4 pr-10 focus:outline-none focus:border-primary transition-colors cursor-pointer">
@@ -46,7 +47,7 @@ require __DIR__ . '/includes/header.php';
   </div>
 </form>
 
-<div class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop pb-20">
+<div class="pb-16">
   <?php if (!$dbOk): ?>
     <p class="font-body-md text-on-surface-variant">Agents unavailable.</p>
   <?php elseif ($agents === []): ?>
@@ -90,4 +91,4 @@ require __DIR__ . '/includes/header.php';
   <?php endif; ?>
 </div>
 <?php
-require __DIR__ . '/includes/footer.php';
+require __DIR__ . '/includes/footer-hougarden.php';

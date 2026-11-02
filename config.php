@@ -2,8 +2,10 @@
 /**
  * Central application configuration.
  *
- * Copy config.local.php.example to config.local.php and set secrets there.
- * config.local.php is gitignored and overrides values below.
+ * Local dev: copy config.local.php.example → config.local.php (gitignored; overrides below).
+ * InfinityFree / trust-offshore style: put MySQL credentials in config.php on the server,
+ *   OR copy config.infinityfree.php.example → config.local.php on the server only.
+ * Do NOT upload your PC's config.local.php to InfinityFree — it overrides config.php.
  */
 
 declare(strict_types=1);
@@ -49,6 +51,17 @@ $config = [
         'key' => '',
     ],
 
+    /**
+     * Admin account recovery (web forms). Turn off in production after setup.
+     * admin.setup_enabled          → login shows link; /admin/setup.php create or update admin by email
+     * admin.password_reset_enabled → login shows link; /admin/reset-password.php reset existing admin only
+     * If no admin exists yet, /admin/setup.php is always allowed until the first account is created.
+     */
+    'admin' => [
+        'setup_enabled' => false,
+        'password_reset_enabled' => false,
+    ],
+
     'security' => [
         'session_name' => 'sdc_re_session',
         'csrf_token_key' => '_csrf_token',
@@ -66,7 +79,9 @@ $config = [
 
     'uploads' => [
         'properties_dir' => __DIR__ . '/uploads/properties',
-        'max_bytes' => 10 * 1024 * 1024, // 10MB images; video limits later
+        'max_bytes' => 10 * 1024 * 1024, // 10MB upload cap; stored files normalized to property_image_max_bytes
+        'property_image_max_bytes' => 400 * 1024,
+        'property_image_min_bytes' => 200 * 1024,
         'allowed_mime' => [
             'image/jpeg',
             'image/png',
@@ -101,6 +116,21 @@ if (is_readable($localConfigPath)) {
 // Production safety: never leave debug on when env is production.
 if (($config['app']['env'] ?? '') === 'production') {
     $config['app']['debug'] = false;
+}
+
+// If config.local.php still has a local dev app.url, asset links break on the public host
+// (browser may prompt for "local network" access when loading http://127.0.0.1:8765/...).
+if (PHP_SAPI !== 'cli' && !empty($_SERVER['HTTP_HOST'])) {
+    $configuredUrl = rtrim((string) ($config['app']['url'] ?? ''), '/');
+    $looksLocal = $configuredUrl === ''
+        || preg_match('#^https?://(127\.0\.0\.1|localhost)(:\d+)?(/|$)#i', $configuredUrl) === 1;
+    if ($looksLocal) {
+        $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
+            || (isset($_SERVER['SERVER_PORT']) && (string) $_SERVER['SERVER_PORT'] === '443');
+        $scheme = $https ? 'https' : 'http';
+        $config['app']['url'] = $scheme . '://' . preg_replace('/[^\w.\-:]/', '', (string) $_SERVER['HTTP_HOST']);
+    }
 }
 
 return $config;

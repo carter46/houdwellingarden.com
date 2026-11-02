@@ -195,7 +195,7 @@ function inquiry_notify_admin(array $inquiry): array
             $propertyLine .= ' — ' . $inquiry['property_title'];
         }
         if (!empty($inquiry['property_slug'])) {
-            $propertyLine .= ' (' . base_url('property.php?slug=' . rawurlencode((string) $inquiry['property_slug'])) . ')';
+            $propertyLine .= ' (' . absolute_url('property.php?slug=' . rawurlencode((string) $inquiry['property_slug'])) . ')';
         }
     }
 
@@ -207,7 +207,7 @@ function inquiry_notify_admin(array $inquiry): array
         . "Interest: " . ($inquiry['interest'] ?? '') . "\n"
         . ($propertyLine !== '' ? $propertyLine . "\n" : '')
         . "\nMessage:\n" . ($inquiry['message'] ?? '') . "\n\n"
-        . "Admin: " . base_url('admin/inquiries.php?id=' . (int) ($inquiry['id'] ?? 0)) . "\n";
+        . "Admin: " . absolute_url('admin/inquiries.php?id=' . (int) ($inquiry['id'] ?? 0)) . "\n";
 
     $html = '<p><strong>New inquiry received</strong></p>'
         . '<ul>'

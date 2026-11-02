@@ -123,7 +123,9 @@ function property_upload_image(array $file, int $propertyId): array
         return ['ok' => false, 'error' => 'Could not store uploaded file.', 'path' => null];
     }
 
-    $relative = 'uploads/properties/' . $propertyId . '/' . $filename;
+    property_image_optimize_file($dest);
+
+    $relative = 'uploads/properties/' . $propertyId . '/' . basename($dest);
     return ['ok' => true, 'error' => null, 'path' => $relative];
 }
 

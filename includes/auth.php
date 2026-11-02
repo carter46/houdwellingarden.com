@@ -117,6 +117,22 @@ function auth_require(): void
     }
 }
 
+function admin_setup_enabled(): bool
+{
+    return (bool) app_config('admin.setup_enabled', false);
+}
+
+function admin_password_reset_enabled(): bool
+{
+    return (bool) app_config('admin.password_reset_enabled', false);
+}
+
+/** Setup form: first admin always, or when config allows create/update. */
+function admin_setup_page_allowed(): bool
+{
+    return admin_setup_required() || admin_setup_enabled();
+}
+
 /**
  * Whether the one-time admin setup is still required.
  * True when no active admin with a password_hash exists.
@@ -225,12 +241,133 @@ function auth_logout(): void
  *
  * @return array{ok: bool, error: ?string}
  */
+/**
+ * @return array{ok: bool, error: ?string, min_len?: int}
+ */
+function auth_validate_admin_password(string $password, string $passwordConfirm): array
+{
+    if ($password === '') {
+        return ['ok' => false, 'error' => 'Password is required.', 'min_len' => 12];
+    }
+    $minLen = 12;
+    if (strlen($password) < $minLen) {
+        return ['ok' => false, 'error' => "Password must be at least {$minLen} characters.", 'min_len' => $minLen];
+    }
+    if (!hash_equals($password, $passwordConfirm)) {
+        return ['ok' => false, 'error' => 'Password confirmation does not match.', 'min_len' => $minLen];
+    }
+
+    return ['ok' => true, 'error' => null, 'min_len' => $minLen];
+}
+
+function auth_hash_admin_password(string $password): ?string
+{
+    $algo = app_config('security.password_algo', PASSWORD_DEFAULT);
+    $hash = password_hash($password, is_int($algo) || is_string($algo) ? $algo : PASSWORD_DEFAULT);
+
+    return $hash !== false ? $hash : null;
+}
+
+/**
+ * Create the first admin (no active admin with password yet).
+ *
+ * @return array{ok: bool, error: ?string, action?: string}
+ */
 function auth_create_first_admin(string $name, string $email, string $password, string $passwordConfirm): array
 {
     if (!admin_setup_required()) {
-        return ['ok' => false, 'error' => 'Admin setup is already complete.'];
+        return ['ok' => false, 'error' => 'Admin setup is already complete. Sign in, or enable admin.setup_enabled in config to create or update an account.'];
     }
 
+    $result = auth_persist_admin_account($name, $email, $password, $passwordConfirm, true);
+    if ($result['ok']) {
+        $result['action'] = $result['action'] ?? 'created';
+    }
+
+    return $result;
+}
+
+/**
+ * Create or update an admin when admin.setup_enabled is true (config.local.php).
+ *
+ * @return array{ok: bool, error: ?string, action?: string|null}
+ */
+function auth_upsert_admin_account(string $name, string $email, string $password, string $passwordConfirm): array
+{
+    if (!admin_setup_enabled()) {
+        return [
+            'ok' => false,
+            'error' => 'Create/update admin is disabled. Set admin.setup_enabled to true in config.local.php (or config.php).',
+        ];
+    }
+
+    return auth_persist_admin_account($name, $email, $password, $passwordConfirm, admin_setup_required());
+}
+
+/**
+ * Reset password for an existing admin when admin.password_reset_enabled is true.
+ *
+ * @return array{ok: bool, error: ?string}
+ */
+function auth_reset_admin_password(string $email, string $password, string $passwordConfirm): array
+{
+    if (!admin_password_reset_enabled()) {
+        return [
+            'ok' => false,
+            'error' => 'Password reset is disabled. Set admin.password_reset_enabled to true in config.local.php.',
+        ];
+    }
+
+    $email = strtolower(trim($email));
+    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        return ['ok' => false, 'error' => 'Enter a valid admin email address.'];
+    }
+
+    $pw = auth_validate_admin_password($password, $passwordConfirm);
+    if (!$pw['ok']) {
+        return ['ok' => false, 'error' => $pw['error']];
+    }
+
+    $hash = auth_hash_admin_password($password);
+    if ($hash === null) {
+        return ['ok' => false, 'error' => 'Unable to hash password.'];
+    }
+
+    try {
+        $stmt = db()->prepare(
+            "SELECT id FROM users WHERE email = ? AND role = 'admin' AND is_active = 1 LIMIT 1"
+        );
+        $stmt->execute([$email]);
+        $row = $stmt->fetch();
+        if (!is_array($row)) {
+            return [
+                'ok' => false,
+                'error' => 'No active admin account with that email. Use setup (if setup_enabled) to create one.',
+            ];
+        }
+
+        db()->prepare(
+            'UPDATE users SET password_hash = ?, setup_completed_at = COALESCE(setup_completed_at, NOW()), updated_at = NOW() WHERE id = ?'
+        )->execute([$hash, (int) $row['id']]);
+
+        return ['ok' => true, 'error' => null];
+    } catch (Throwable $e) {
+        app_log('auth', 'admin password reset failed: ' . $e->getMessage());
+
+        return ['ok' => false, 'error' => 'Could not update password. Check database connection.'];
+    }
+}
+
+/**
+ * @return array{ok: bool, error: ?string, action?: string}
+ */
+function auth_persist_admin_account(
+    string $name,
+    string $email,
+    string $password,
+    string $passwordConfirm,
+    bool $signInAfter
+): array {
     $name = trim($name);
     $email = strtolower(trim($email));
 
@@ -242,53 +379,52 @@ function auth_create_first_admin(string $name, string $email, string $password, 
         return ['ok' => false, 'error' => 'Enter a valid email address.'];
     }
 
-    if (strlen($password) < 12) {
-        return ['ok' => false, 'error' => 'Password must be at least 12 characters.'];
+    $pw = auth_validate_admin_password($password, $passwordConfirm);
+    if (!$pw['ok']) {
+        return ['ok' => false, 'error' => $pw['error']];
     }
 
-    if (!hash_equals($password, $passwordConfirm)) {
-        return ['ok' => false, 'error' => 'Password confirmation does not match.'];
-    }
-
-    $algo = app_config('security.password_algo', PASSWORD_DEFAULT);
-    $hash = password_hash($password, is_int($algo) || is_string($algo) ? $algo : PASSWORD_DEFAULT);
-    if ($hash === false) {
+    $hash = auth_hash_admin_password($password);
+    if ($hash === null) {
         return ['ok' => false, 'error' => 'Unable to hash password.'];
     }
 
     try {
-        $check = db()->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
+        $check = db()->prepare('SELECT id, role FROM users WHERE email = ? LIMIT 1');
         $check->execute([$email]);
         $existing = $check->fetch();
+        $action = 'created';
 
         if (is_array($existing)) {
-            $upd = db()->prepare(
+            $action = 'updated';
+            db()->prepare(
                 "UPDATE users
                  SET name = ?, password_hash = ?, role = 'admin', is_active = 1,
-                     setup_completed_at = NOW(), updated_at = NOW()
+                     setup_completed_at = COALESCE(setup_completed_at, NOW()), updated_at = NOW()
                  WHERE id = ?"
-            );
-            $upd->execute([$name, $hash, (int) $existing['id']]);
+            )->execute([$name, $hash, (int) $existing['id']]);
             $userId = (int) $existing['id'];
         } else {
-            $ins = db()->prepare(
+            db()->prepare(
                 "INSERT INTO users (email, password_hash, name, role, is_active, setup_completed_at)
                  VALUES (?, ?, ?, 'admin', 1, NOW())"
-            );
-            $ins->execute([$email, $hash, $name]);
+            )->execute([$email, $hash, $name]);
             $userId = (int) db()->lastInsertId();
         }
 
-        auth_login_user([
-            'id' => $userId,
-            'email' => $email,
-            'name' => $name,
-            'role' => 'admin',
-        ]);
+        if ($signInAfter) {
+            auth_login_user([
+                'id' => $userId,
+                'email' => $email,
+                'name' => $name,
+                'role' => 'admin',
+            ]);
+        }
 
-        return ['ok' => true, 'error' => null];
+        return ['ok' => true, 'error' => null, 'action' => $action];
     } catch (Throwable $e) {
-        app_log('auth', 'admin setup failed: ' . $e->getMessage());
-        return ['ok' => false, 'error' => 'Could not create admin account. Check database connection.'];
+        app_log('auth', 'admin persist failed: ' . $e->getMessage());
+
+        return ['ok' => false, 'error' => 'Could not save admin account. Check database connection.'];
     }
 }

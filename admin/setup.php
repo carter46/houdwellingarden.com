@@ -1,23 +1,35 @@
 <?php
 /**
- * One-time admin setup — creates the first admin password (never seeded).
+ * Admin setup — first account (always) or create/update when admin.setup_enabled is true.
  */
 
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
-if (!admin_setup_required()) {
+if (!admin_setup_page_allowed()) {
     if (auth_check()) {
         redirect('admin/index.php');
     }
-    flash_set('auth_error', 'Admin setup is already complete. Please sign in.');
+    flash_set('auth_error', 'Admin setup is disabled. Set admin.setup_enabled to true in config.local.php if you need create/update access.');
     redirect('admin/login.php');
 }
 
+$isInitial = admin_setup_required();
+$isConfigSetup = admin_setup_enabled();
+$title = $isInitial ? 'Create admin account' : 'Create or update admin';
+$lead = $isInitial
+    ? 'No admin account exists yet. Choose a strong password (12+ characters).'
+    : 'Creates a new admin or updates the password for an existing email. Turn off admin.setup_enabled in config after you finish.';
+
 $error = null;
+$successAction = null;
 $name = '';
 $email = '';
+
+if (auth_check() && !$isInitial && !$isConfigSetup) {
+    redirect('admin/index.php');
+}
 
 if (is_post()) {
     if (!csrf_verify()) {
@@ -27,22 +39,34 @@ if (is_post()) {
         $email = (string) ($_POST['email'] ?? '');
         $password = (string) ($_POST['password'] ?? '');
         $confirm = (string) ($_POST['password_confirm'] ?? '');
-        $result = auth_create_first_admin($name, $email, $password, $confirm);
-        if ($result['ok']) {
-            flash_set('auth_ok', 'Admin account created. Welcome.');
-            redirect('admin/index.php');
+
+        if ($isInitial) {
+            $result = auth_create_first_admin($name, $email, $password, $confirm);
+        } else {
+            $result = auth_upsert_admin_account($name, $email, $password, $confirm);
         }
-        $error = $result['error'] ?? 'Setup failed.';
+
+        if ($result['ok']) {
+            $successAction = $result['action'] ?? 'created';
+            if ($isInitial || ($successAction === 'created' && admin_setup_required())) {
+                flash_set('auth_ok', 'Admin account created. Welcome.');
+                redirect('admin/index.php');
+            }
+        } else {
+            $error = $result['error'] ?? 'Setup failed.';
+        }
     }
 }
 
-$appName = (string) app_config('app.name', 'SDC');
+$appName = site_name();
+$minLen = 12;
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
     <title>Admin setup — <?= e($appName) ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,12 +76,24 @@ $appName = (string) app_config('app.name', 'SDC');
 <body class="admin-body">
 <div class="admin-auth">
     <div class="admin-auth__card">
-        <span class="admin-eyebrow">SDC Admin</span>
-        <h1>Create admin account</h1>
-        <p class="lead">One-time setup. No default password is seeded. Choose a strong password (12+ characters).</p>
+        <span class="admin-eyebrow">Admin Console</span>
+        <h1><?= e($title) ?></h1>
+        <p class="lead"><?= e($lead) ?></p>
+
+        <?php if ($successAction !== null): ?>
+            <div class="admin-alert admin-alert--ok">
+                Admin account <?= $successAction === 'updated' ? 'updated' : 'created' ?>.
+                Turn off <code>admin.setup_enabled</code> in config.local.php, then sign in.
+            </div>
+            <p style="margin-top:1rem;"><a class="admin-btn" href="<?= e(base_url('admin/login.php')) ?>">Go to admin login</a></p>
+        <?php else: ?>
 
         <?php if ($error): ?>
             <div class="admin-alert admin-alert--error"><?= e($error) ?></div>
+        <?php endif; ?>
+
+        <?php if ($isConfigSetup && !$isInitial): ?>
+            <p class="admin-note" style="margin:0 0 1rem;">Config: <code>admin.setup_enabled</code> is on.</p>
         <?php endif; ?>
 
         <form method="post" action="">
@@ -72,15 +108,20 @@ $appName = (string) app_config('app.name', 'SDC');
             </div>
             <div class="admin-field">
                 <label for="password">Password</label>
-                <input id="password" name="password" type="password" required autocomplete="new-password" minlength="12">
+                <input id="password" name="password" type="password" required autocomplete="new-password" minlength="<?= (int) $minLen ?>">
             </div>
             <div class="admin-field">
                 <label for="password_confirm">Confirm password</label>
-                <input id="password_confirm" name="password_confirm" type="password" required autocomplete="new-password" minlength="12">
+                <input id="password_confirm" name="password_confirm" type="password" required autocomplete="new-password" minlength="<?= (int) $minLen ?>">
             </div>
-            <button class="admin-btn" type="submit">Create admin &amp; continue</button>
+            <button class="admin-btn" type="submit"><?= $isInitial ? 'Create admin &amp; continue' : 'Save admin account' ?></button>
         </form>
-        <p class="admin-auth__foot"><a href="<?= e(base_url('index.php')) ?>">Back to site</a></p>
+        <?php endif; ?>
+
+        <p class="admin-auth__foot">
+            <a href="<?= e(base_url('admin/login.php')) ?>">Back to login</a>
+            · <a href="<?= e(base_url('index.php')) ?>">Exit to site</a>
+        </p>
     </div>
 </div>
 </body>

@@ -69,13 +69,12 @@ function site_name_short(int $maxLen = 18): string
 function site_phone(): string
 {
     $phone = trim((string) (setting_get('site_phone') ?? ''));
-    return $phone !== '' ? $phone : '800.555.0123';
+    return $phone;
 }
 
 function site_email(): string
 {
-    $email = trim((string) (setting_get('site_email') ?? ''));
-    return $email !== '' ? $email : 'info@example.com';
+    return trim((string) (setting_get('site_email') ?? ''));
 }
 
 function site_mail_from_name(): string

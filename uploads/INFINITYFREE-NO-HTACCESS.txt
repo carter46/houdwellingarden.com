@@ -1,0 +1,4 @@
+InfinityFree: if property images return 500, DELETE any .htaccess inside uploads/
+(including uploads/.htaccess, uploads/branding/.htaccess, uploads/regions/.htaccess).
+JPG files do not need .htaccess. Re-test:
+  https://YOUR-DOMAIN/uploads/properties/hg-1/cover.jpg

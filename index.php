@@ -1,134 +1,130 @@
 <?php
 /**
- * Homepage — seven Stitch sections + MySQL featured listings.
+ * Homepage — HouGarden /au–inspired layout.
  */
 
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/hougarden-shell.php';
+require_once __DIR__ . '/includes/hougarden-locations.php';
 
-$pageTitle = site_name() . ' — Luxury Mountain Living';
-$activeNav = 'home';
+$pageTitle = site_name() . ' — Australian property';
+hougarden_use_public_shell('home', 'hougarden-home');
 
-$featured = [];
+$feed = (string) ($_GET['feed'] ?? 'recommend');
+if (!in_array($feed, ['recommend', 'watched', 'saved'], true)) {
+    $feed = 'recommend';
+}
+
+$locationCategories = [];
+$feedListings = [];
+$feedCounts = ['recommend' => 0, 'watched' => 0, 'saved' => 0];
 $dbOk = true;
+
 try {
-    $featured = property_list_public(['featured_only' => true], 'newest', 6, 0);
-    if (count($featured) < 6) {
-        $more = property_list_public([], 'newest', 6, 0);
-        $ids = array_column($featured, 'id');
-        foreach ($more as $row) {
-            if (!in_array($row['id'], $ids, true)) {
-                $featured[] = $row;
-            }
-            if (count($featured) >= 6) {
-                break;
+    foreach (hougarden_location_markets() as $market) {
+        $label = (string) $market['label'];
+        $filter = $market['filter'];
+        $count = property_count_public($filter);
+        $rows = property_list_public($filter, 'newest', 1, 0);
+        $image = (string) ($market['image'] ?? '');
+        if ($rows !== []) {
+            $cover = trim((string) ($rows[0]['cover_path'] ?? $rows[0]['image_path'] ?? ''));
+            if ($cover !== '' && !preg_match('#^https?://#i', $cover)) {
+                $rel = ltrim(str_replace('\\', '/', $cover), '/');
+                if (is_file(APP_ROOT . '/' . $rel)) {
+                    $image = media_url($cover);
+                }
+            } elseif ($cover !== '' && preg_match('#^https?://#i', $cover)) {
+                $image = $cover;
             }
         }
+        $locationCategories[] = [
+            'label' => $label,
+            'href' => base_url('properties.php?' . http_build_query($filter)),
+            'image' => $image,
+            'count' => $count,
+        ];
     }
+
+    foreach (array_keys($feedCounts) as $key) {
+        $feedCounts[$key] = property_count_public(['home_feed' => $key]);
+    }
+    $feedListings = property_list_public(['home_feed' => $feed], 'newest', 6, 0);
 } catch (Throwable $e) {
     $dbOk = false;
     error_log('[SDC] home: ' . $e->getMessage());
 }
 
-$collections = [];
-try {
-    $collections = regions_featured_home(3);
-} catch (Throwable $e) {
-    $collections = [];
+$heroImage = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=80';
+if ($locationCategories !== []) {
+    $heroImage = (string) ($locationCategories[0]['image'] ?? $heroImage);
 }
 
-require __DIR__ . '/includes/header.php';
+$searchDefaultTab = 'location';
+$feedLabels = [
+    'recommend' => 'Recommend',
+    'watched' => 'Just watched',
+    'saved' => 'Saved',
+];
+
+require __DIR__ . '/includes/header-hougarden.php';
 ?>
-<!-- 2. Hero -->
-<section class="relative min-h-[78vh] flex items-center justify-center hero-photo" style="background-image: linear-gradient(180deg, rgba(28,27,27,0.55), rgba(28,27,27,0.88)), url('<?= e(base_url('assets/img/3d-rendering-contemporary.jpg')) ?>');">
-  <div class="w-full max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop py-24 text-center flex flex-col items-center">
-    <div class="w-12 h-0.5 bg-primary-fixed-dim mb-6"></div>
-    <h1 class="font-display-lg text-[2rem] sm:text-[2.5rem] lg:text-[3.25rem] leading-[1.15] text-on-primary max-w-2xl mb-4">
-      Quiet Luxury. <em class="italic">Distinctive Homes.</em>
-    </h1>
-    <p class="font-body-lg text-body-lg text-on-primary/85 font-light max-w-xl mb-8">
-      Discover exclusive Colorado estates curated by <?= e(site_name()) ?>.
-    </p>
-    <div class="flex flex-wrap gap-3 justify-center">
-      <a href="<?= e(base_url('properties.php')) ?>" class="px-8 py-3 bg-surface text-primary font-label-sm text-label-sm uppercase tracking-widest hover:bg-primary-fixed transition-colors">Explore Properties</a>
-      <a href="<?= e(base_url('agents.php')) ?>" class="px-8 py-3 border border-on-primary/50 text-on-primary font-label-sm text-label-sm uppercase tracking-widest hover:bg-on-primary/10 transition-colors">Meet Our Agents</a>
+<section class="hg-hero" aria-label="Search properties">
+  <div class="hg-hero__visual">
+    <img class="hg-hero__bg" src="<?= e($heroImage) ?>" alt="" decoding="async"/>
+    <div class="hg-hero__scrim hg-hero__scrim--visual" aria-hidden="true"></div>
+  </div>
+  <div class="hg-hero__body">
+    <h1 class="hg-hero__title">Search the way you talk</h1>
+    <div class="hg-search-shell">
+      <?php
+      $searchAction = base_url('properties.php');
+      require __DIR__ . '/includes/search-form-hougarden.php';
+      ?>
     </div>
   </div>
 </section>
 
-<!-- 3. Overlapping quick-search -->
-<div class="relative z-10 max-w-[1100px] mx-auto px-margin-mobile -mt-16">
-  <div class="bg-surface-container-lowest border border-outline-variant/40 shadow-[0_12px_40px_rgba(55,5,24,0.08)] p-6 md:p-8">
-    <?php $searchAction = base_url('properties.php'); require __DIR__ . '/includes/search-form.php'; ?>
-  </div>
-</div>
-
-<!-- 4. Exclusive Collections -->
-<section class="py-section-gap">
-  <div class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop">
-    <div class="max-w-2xl mb-12">
-      <p class="font-subheading text-subheading uppercase tracking-widest text-primary mb-3">Destinations</p>
-      <h2 class="font-headline-md text-headline-md text-on-surface mb-3">Exclusive Collections</h2>
-      <p class="font-body-lg text-body-lg text-on-surface-variant font-light">Explore a curated selection of signature markets from the SDC portfolio.</p>
-    </div>
-    <?php if ($collections === []): ?>
-      <p class="font-body-md text-on-surface-variant">Featured destinations will appear here once marked in Admin → Regions.</p>
-    <?php else: ?>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <?php foreach ($collections as $collection): ?>
-          <?php require __DIR__ . '/includes/partials/market-card.php'; ?>
-        <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
-    <div class="mt-10">
-      <a href="<?= e(base_url('markets.php')) ?>" class="inline-flex font-label-sm text-label-sm uppercase tracking-widest text-primary border-b border-primary pb-1 hover:opacity-70">View All Markets</a>
-    </div>
-  </div>
+<section class="hg-section hg-section--locations" aria-labelledby="hg-locations-heading">
+  <h2 class="hg-section__title hg-section__title--page" id="hg-locations-heading">Locations</h2>
+  <?php if (!$dbOk): ?>
+    <p class="hg-empty">Property data is unavailable. Check your database connection in config.</p>
+  <?php elseif ($locationCategories === []): ?>
+    <p class="hg-empty">No location listings yet.</p>
+  <?php else: ?>
+    <?php require __DIR__ . '/includes/partials/home-location-cards.php'; ?>
+  <?php endif; ?>
 </section>
 
-<!-- 5. Curated For You -->
-<section class="py-section-gap bg-surface-container-lowest">
-  <div class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop">
-    <div class="max-w-2xl mb-12">
-      <p class="font-subheading text-subheading uppercase tracking-widest text-primary mb-3">Portfolio</p>
-      <h2 class="font-headline-md text-headline-md text-on-surface mb-3">Curated For You</h2>
-      <p class="font-body-lg text-body-lg text-on-surface-variant font-light">Featured listings from the SDC portfolio — one database record per property wherever it appears.</p>
-    </div>
-    <?php if (!$dbOk): ?>
-      <p class="font-body-md text-on-surface-variant">Property data unavailable. Configure the database to continue.</p>
-    <?php elseif ($featured === []): ?>
-      <p class="font-body-md text-on-surface-variant">No public properties yet. Add listings in the admin console.</p>
-    <?php else: ?>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <?php foreach ($featured as $property): ?>
-          <?php require __DIR__ . '/includes/property-card-home.php'; ?>
-        <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
-    <div class="mt-10">
-      <a href="<?= e(base_url('properties.php')) ?>" class="inline-flex px-8 py-3 bg-primary text-on-primary font-label-sm text-label-sm uppercase tracking-widest hover:bg-primary-container transition-colors">View All Listings</a>
+<section class="hg-section hg-section--recommend pb-16" aria-labelledby="hg-recommend-heading">
+  <div class="hg-recommend-head">
+    <div class="hg-pill-tabs" role="tablist" aria-label="Listing filters">
+      <?php foreach ($feedLabels as $feedKey => $feedLabel): ?>
+        <?php
+          $isActive = $feed === $feedKey;
+          $pillHref = base_url('index.php?' . http_build_query(['feed' => $feedKey]));
+          $count = (int) ($feedCounts[$feedKey] ?? 0);
+        ?>
+        <a class="hg-pill<?= $isActive ? ' is-active' : '' ?>" role="tab" aria-selected="<?= $isActive ? 'true' : 'false' ?>" href="<?= e($pillHref) ?>">
+          <?= e($feedLabel) ?><?= $count > 0 ? ' (' . $count . ')' : '' ?>
+        </a>
+      <?php endforeach; ?>
     </div>
   </div>
-</section>
-
-<!-- 6. Unmatched Market Expertise -->
-<section class="py-section-gap">
-  <div class="max-w-[1440px] mx-auto px-margin-mobile lg:px-margin-desktop grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-    <div>
-      <div class="w-12 h-0.5 bg-primary mb-6"></div>
-      <h2 class="font-headline-md text-headline-md text-on-surface mb-4">Unmatched Market Expertise</h2>
-      <p class="font-body-lg text-body-lg text-on-surface-variant font-light mb-4">From alpine estates to urban residences, SDC combines local market intelligence with a refined, editorial approach to property presentation.</p>
-      <p class="font-body-lg text-body-lg text-on-surface-variant font-light mb-8">Our advisors guide acquisitions and sales with discretion, clarity, and an eye for architectural significance.</p>
-      <a href="<?= e(base_url('about.php')) ?>" class="inline-flex font-label-sm text-label-sm uppercase tracking-widest text-primary border border-primary px-8 py-3 hover:bg-primary hover:text-on-primary transition-colors">Read Our Latest Market Report</a>
+  <h2 class="sr-only" id="hg-recommend-heading"><?= e($feedLabels[$feed] ?? 'Listings') ?></h2>
+  <?php if (!$dbOk): ?>
+    <p class="hg-empty">Property data is unavailable.</p>
+  <?php elseif ($feedListings === []): ?>
+    <p class="hg-empty">No listings in this feed yet. In admin, edit a property and check <strong><?= e($feedLabels[$feed] ?? '') ?></strong> under Homepage feeds.</p>
+  <?php else: ?>
+    <div class="hg-recommend-grid">
+      <?php foreach ($feedListings as $property): ?>
+        <?php require __DIR__ . '/includes/property-card-hougarden-recommend.php'; ?>
+      <?php endforeach; ?>
     </div>
-    <div class="relative min-h-[28rem] bg-cover bg-center" style="background-image: url('<?= e(base_url('assets/img/3d-rendering-house-model.jpg')) ?>');">
-      <div class="absolute left-4 bottom-4 bg-surface-container-lowest border border-outline-variant/40 p-5 shadow-md">
-        <p class="font-display-lg text-[32px] text-on-surface">$2B+</p>
-        <p class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">In Luxury Sales Volume</p>
-      </div>
-    </div>
-  </div>
+  <?php endif; ?>
 </section>
 <?php
-require __DIR__ . '/includes/footer.php';
+require __DIR__ . '/includes/footer-hougarden.php';

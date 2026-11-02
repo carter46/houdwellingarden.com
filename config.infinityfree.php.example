@@ -1,0 +1,28 @@
+<?php
+/**
+ * InfinityFree / .gt.tc deploy (same idea as trust-offshore config.php).
+ *
+ * Option A — like trust-offshore: edit db.* directly in config.php on the server.
+ * Option B — copy this file to config.local.php on the server only (do NOT upload your PC config.local.php).
+ *
+ * MySQL host is NEVER 127.0.0.1 on InfinityFree — use the sql###.infinityfree.com host from the panel.
+ */
+
+declare(strict_types=1);
+
+return [
+    'app' => [
+        'env' => 'production',
+        'debug' => false,
+        'url' => 'https://houdwellingarden.gt.tc',
+    ],
+
+    'db' => [
+        'host' => 'sqlXXX.infinityfree.com',
+        'port' => 3306,
+        'name' => 'if0_XXXXX_dbname',
+        'user' => 'if0_XXXXX',
+        'pass' => 'YOUR_INFINITYFREE_MYSQL_PASSWORD',
+        'charset' => 'utf8mb4',
+    ],
+];
