@@ -24,17 +24,17 @@ $user = auth_user();
     <?php endif; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;1,400&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" rel="stylesheet">
-    <link rel="stylesheet" href="<?= e(base_url('assets/css/admin.css')) ?>?v=7">
+    <link rel="stylesheet" href="<?= e(asset_url('assets/css/admin.css')) ?>">
+    <link rel="stylesheet" href="<?= e(asset_url('assets/css/admin-hougarden.css')) ?>">
 </head>
-<body class="admin-body">
+<body class="admin-body hougarden-admin">
 <header class="admin-topbar">
     <div class="admin-topbar__brand">
-        <div class="admin-topbar__mark" aria-hidden="true">SDC</div>
+        <div class="admin-topbar__mark" aria-hidden="true">h</div>
         <div class="admin-topbar__titles">
-            <span class="admin-eyebrow">Admin Console</span>
-            <span class="admin-topbar__subtitle">Portfolio Manager · Colorado Region</span>
+            <span class="admin-eyebrow">Admin</span>
+            <span class="admin-topbar__subtitle"><?= e($appName) ?></span>
         </div>
     </div>
     <div class="admin-topbar__meta">

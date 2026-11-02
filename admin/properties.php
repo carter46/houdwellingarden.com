@@ -28,7 +28,7 @@ $adminPageTitle = $viewArchived ? 'Archived Properties' : 'Manage Properties';
 $adminActiveNav = 'properties';
 require dirname(__DIR__) . '/includes/admin-header.php';
 ?>
-<span class="admin-eyebrow">Portfolio Manager</span>
+<span class="admin-eyebrow">Listings</span>
 <h1 class="admin-page-title"><?= e($adminPageTitle) ?></h1>
 <p class="admin-page-lead">Showing <?= e((string) count($rows)) ?> of <?= e((string) $total) ?> matching listings.</p>
 

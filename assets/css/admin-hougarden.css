@@ -1,0 +1,183 @@
+/* HouGarden admin — matches public site (blue brand, clean cards). */
+
+body.admin-body.hougarden-admin {
+  --primary: #079beb;
+  --primary-container: #058cd4;
+  --bg: #f5f6f7;
+  --surface: #ffffff;
+  --on-surface: #20242b;
+  --muted: #69717d;
+  --outline: #e8eaed;
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+}
+
+body.hougarden-admin .admin-topbar {
+  border-bottom-color: var(--outline);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+
+body.hougarden-admin .admin-topbar__mark {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: var(--primary);
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+body.hougarden-admin .admin-topbar__titles {
+  border-left-color: var(--outline);
+}
+
+body.hougarden-admin .admin-topbar__subtitle {
+  color: var(--muted);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body.hougarden-admin .admin-eyebrow {
+  color: var(--primary);
+  letter-spacing: 0.06em;
+}
+
+body.hougarden-admin .admin-sidebar {
+  border-right-color: var(--outline);
+  background: #fff;
+}
+
+body.hougarden-admin .admin-sidebar__link {
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 500;
+}
+
+body.hougarden-admin .admin-sidebar__link:hover,
+body.hougarden-admin .admin-sidebar__link.is-active {
+  color: var(--primary);
+  background: rgba(7, 155, 235, 0.08);
+}
+
+body.hougarden-admin .admin-sidebar__link--exit {
+  border-top-color: var(--outline);
+}
+
+body.hougarden-admin .admin-btn {
+  border-radius: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--primary);
+}
+
+body.hougarden-admin .admin-btn:hover {
+  background: var(--primary-container);
+}
+
+body.hougarden-admin .admin-btn--ghost {
+  background: transparent;
+  color: var(--primary);
+  border-color: var(--outline);
+}
+
+body.hougarden-admin .admin-panel,
+body.hougarden-admin .admin-kpi {
+  border-radius: 8px;
+  border-color: var(--outline);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+body.hougarden-admin .admin-page-title,
+body.hougarden-admin .admin-panel h2,
+body.hougarden-admin .admin-auth__card h1 {
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+body.hougarden-admin .admin-field input,
+body.hougarden-admin .admin-field select,
+body.hougarden-admin .admin-field textarea {
+  border-radius: 8px;
+  border-color: var(--outline);
+  background: #fff;
+}
+
+body.hougarden-admin .admin-field input:focus,
+body.hougarden-admin .admin-field select:focus,
+body.hougarden-admin .admin-field textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(7, 155, 235, 0.15);
+}
+
+body.hougarden-admin .admin-auth {
+  background: linear-gradient(180deg, #f5f6f7 0%, #fff 100%);
+}
+
+body.hougarden-admin .admin-auth__card {
+  border-radius: 12px;
+  border-color: var(--outline);
+  box-shadow: var(--hg-shadow, 0 4px 24px rgba(0, 0, 0, 0.08));
+  padding: 2rem 2rem 1.75rem;
+}
+
+body.hougarden-admin .admin-auth__logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+body.hougarden-admin .admin-auth__logo-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+body.hougarden-admin .admin-auth__logo-text {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--on-surface);
+}
+
+body.hougarden-admin .admin-alert--ok {
+  border-color: rgba(7, 155, 235, 0.35);
+  background: rgba(7, 155, 235, 0.08);
+  color: #0369a1;
+  border-radius: 8px;
+}
+
+body.hougarden-admin .admin-alert--error {
+  border-radius: 8px;
+}
+
+body.hougarden-admin .admin-table tr.is-selected td {
+  background: rgba(7, 155, 235, 0.06);
+}
+
+body.hougarden-admin .admin-badge {
+  border-radius: 4px;
+  background: var(--primary);
+}
+
+body.hougarden-admin .admin-topbar__link {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.8125rem;
+}

@@ -33,25 +33,11 @@ if (is_post()) {
     }
 }
 
-$appName = site_name();
+$authPageTitle = 'Sign in';
+require dirname(__DIR__) . '/includes/admin-auth-head.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin login — <?= e($appName) ?></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;1,400&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= e(base_url('assets/css/admin.css')) ?>">
-</head>
-<body class="admin-body">
-<div class="admin-auth">
-    <div class="admin-auth__card">
-        <span class="admin-eyebrow">Admin Console</span>
         <h1>Sign in</h1>
-        <p class="lead"><?= e(site_name()) ?> portfolio manager.</p>
+        <p class="lead">Manage listings, inquiries, and site settings.</p>
 
         <?php if ($ok): ?>
             <div class="admin-alert admin-alert--ok"><?= e($ok) ?></div>
@@ -84,8 +70,5 @@ $appName = site_name();
             </div>
         <?php endif; ?>
 
-        <p class="admin-auth__foot"><a href="<?= e(base_url('index.php')) ?>">Exit to site</a></p>
-    </div>
-</div>
-</body>
-</html>
+        <p class="admin-auth__foot"><a href="<?= e(base_url('index.php')) ?>">Back to website</a></p>
+<?php require dirname(__DIR__) . '/includes/admin-auth-foot.php'; ?>

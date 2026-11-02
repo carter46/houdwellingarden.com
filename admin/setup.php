@@ -58,25 +58,10 @@ if (is_post()) {
     }
 }
 
-$appName = site_name();
 $minLen = 12;
+$authPageTitle = $title;
+require dirname(__DIR__) . '/includes/admin-auth-head.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex,nofollow">
-    <title>Admin setup — <?= e($appName) ?></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;1,400&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= e(base_url('assets/css/admin.css')) ?>">
-</head>
-<body class="admin-body">
-<div class="admin-auth">
-    <div class="admin-auth__card">
-        <span class="admin-eyebrow">Admin Console</span>
         <h1><?= e($title) ?></h1>
         <p class="lead"><?= e($lead) ?></p>
 
@@ -120,9 +105,6 @@ $minLen = 12;
 
         <p class="admin-auth__foot">
             <a href="<?= e(base_url('admin/login.php')) ?>">Back to login</a>
-            · <a href="<?= e(base_url('index.php')) ?>">Exit to site</a>
+            · <a href="<?= e(base_url('index.php')) ?>">Back to website</a>
         </p>
-    </div>
-</div>
-</body>
-</html>
+<?php require dirname(__DIR__) . '/includes/admin-auth-foot.php'; ?>

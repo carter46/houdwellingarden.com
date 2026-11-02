@@ -19,12 +19,12 @@ $activeAgents = (int) $pdo->query('SELECT COUNT(*) FROM agents WHERE is_active =
 
 $flashOk = flash_get('auth_ok');
 
-$adminPageTitle = 'Dashboard Overview';
+$adminPageTitle = 'Dashboard';
 $adminActiveNav = 'overview';
 require dirname(__DIR__) . '/includes/admin-header.php';
 ?>
-<span class="admin-eyebrow">Portfolio</span>
-<h1 class="admin-page-title">Dashboard Overview</h1>
+<span class="admin-eyebrow">Overview</span>
+<h1 class="admin-page-title">Dashboard</h1>
 <p class="admin-page-lead">Live counts from MySQL for <?= e(site_name()) ?>.</p>
 
 <?php if ($flashOk): ?>
@@ -53,7 +53,7 @@ require dirname(__DIR__) . '/includes/admin-header.php';
         <div class="admin-kpi__meta">From agents table</div>
     </div>
     <div class="admin-kpi">
-        <div class="admin-kpi__label">Portfolio Status</div>
+        <div class="admin-kpi__label">Listing status</div>
         <p class="admin-kpi__value"><?= e((string) $sold) ?> / <?= e((string) $available) ?></p>
         <div class="admin-kpi__meta">Sold / Available</div>
     </div>
