@@ -40,6 +40,9 @@ try {
                 $image = $cover;
             }
         }
+        if ($image === '') {
+            $image = hougarden_location_fallback_image($label);
+        }
         $locationCategories[] = [
             'label' => $label,
             'href' => base_url('properties.php?' . http_build_query($filter)),

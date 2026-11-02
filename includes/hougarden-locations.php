@@ -1,6 +1,6 @@
 <?php
 /**
- * HouGarden AU homepage / search location markets (Admin → Homepage locations / regions table).
+ * HouGarden AU homepage / search location markets (Admin → Regions).
  *
  * @return list<array{label: string, filter: array<string, string>, image: string}>
  */
@@ -34,6 +34,17 @@ function hougarden_region_search_filter(array $region): array
 
 function hougarden_region_card_image(array $region): string
 {
+    $slug = strtolower((string) preg_replace('/[^a-z0-9]+/', '-', (string) ($region['slug'] ?? '')));
+    $slug = trim($slug, '-');
+    if ($slug !== '') {
+        foreach (['jpg', 'jpeg', 'webp', 'png'] as $ext) {
+            $candidate = 'uploads/regions/' . $slug . '.' . $ext;
+            if (is_file(APP_ROOT . '/' . $candidate)) {
+                return media_url($candidate);
+            }
+        }
+    }
+
     $path = trim((string) ($region['image_path'] ?? ''));
     if ($path !== '') {
         if (preg_match('#^https?://#i', $path)) {

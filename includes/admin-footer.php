@@ -40,7 +40,7 @@ declare(strict_types=1);
     });
   }
 
-  document.querySelectorAll('.admin-property-card__head').forEach(function (btn) {
+  document.querySelectorAll('.admin-property-card__head, .admin-accordion-card__head').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var panelId = btn.getAttribute('aria-controls');
       var panel = panelId ? document.getElementById(panelId) : null;

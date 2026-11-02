@@ -15,7 +15,7 @@ $items = [
     'overview' => ['label' => 'Dashboard', 'href' => 'admin/index.php', 'icon' => 'dashboard'],
     'properties' => ['label' => 'Properties', 'href' => 'admin/properties.php', 'icon' => 'home_work'],
     'types' => ['label' => 'Property types', 'href' => 'admin/property-types.php', 'icon' => 'category'],
-    'regions' => ['label' => 'Homepage locations', 'href' => 'admin/regions.php', 'icon' => 'map'],
+    'regions' => ['label' => 'Regions', 'href' => 'admin/regions.php', 'icon' => 'map'],
     'amenities' => ['label' => 'Amenities', 'href' => 'admin/amenities.php', 'icon' => 'checklist'],
     'inquiries' => ['label' => 'Inquiries', 'href' => 'admin/inquiries.php', 'icon' => 'mail'],
     'settings' => ['label' => 'Settings', 'href' => 'admin/settings.php', 'icon' => 'settings'],

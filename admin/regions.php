@@ -136,19 +136,19 @@ if (is_post()) {
 }
 
 $rows = regions_all(false);
-$adminPageTitle = 'Homepage locations';
+$adminPageTitle = 'Regions';
 $adminActiveNav = 'regions';
 require dirname(__DIR__) . '/includes/admin-header.php';
 ?>
 <div class="admin-page-head">
   <div>
-    <span class="admin-eyebrow">Homepage</span>
-    <h1 class="admin-page-title">Homepage locations</h1>
-    <p class="admin-page-lead">These rows power the <strong>Locations</strong> section on the homepage and search filters. Turn on <strong>Show on homepage</strong> for each suburb or market. Upload a card image optional — otherwise a default photo is used. Active locations also appear on the Markets page.</p>
+    <span class="admin-eyebrow">Site</span>
+    <h1 class="admin-page-title">Regions</h1>
+    <p class="admin-page-lead">Areas shown on the homepage and Markets page. Use <strong>Show on homepage</strong> for location tiles.</p>
   </div>
   <div class="admin-actions" style="gap:0.5rem;">
-    <a class="admin-btn admin-btn--ghost" href="<?= e(base_url('markets.php')) ?>" target="_blank" rel="noopener">View Markets page</a>
-    <button type="button" class="admin-btn" data-modal-open="region-modal">Add location</button>
+    <a class="admin-btn admin-btn--ghost" href="<?= e(base_url('markets.php')) ?>" target="_blank" rel="noopener">View Markets</a>
+    <button type="button" class="admin-btn" data-modal-open="region-modal">Add region</button>
   </div>
 </div>
 
@@ -156,18 +156,18 @@ require dirname(__DIR__) . '/includes/admin-header.php';
 <?php if ($flashErr): ?><div class="admin-alert admin-alert--error"><?= e($flashErr) ?></div><?php endif; ?>
 <?php foreach ($errors as $err): ?><div class="admin-alert admin-alert--error"><?= e($err) ?></div><?php endforeach; ?>
 
+<?php if ($rows === []): ?>
 <div class="admin-panel">
-  <h2>All locations</h2>
-  <?php if ($rows === []): ?>
-    <p class="admin-note">No locations yet. Use “Add location” or import <code>database/hougarden-deploy.sql</code>.</p>
-  <?php else: ?>
+  <p class="admin-note" style="margin:0;">No regions yet. Use “Add region”.</p>
+</div>
+<?php else: ?>
+<section class="admin-panel admin-panel--flush admin-table-only">
     <table class="admin-table">
       <thead><tr><th></th><th>Name</th><th>Sort</th><th>Homepage</th><th>Filter</th><th>Listings</th><th>Status</th><th></th></tr></thead>
       <tbody>
       <?php foreach ($rows as $row): ?>
         <?php
-          $thumb = trim((string) ($row['image_path'] ?? ''));
-          $thumbUrl = $thumb !== '' ? media_url($thumb) : '';
+          $thumbUrl = hougarden_region_card_image($row);
           $usage = taxonomy_region_listing_count($row);
           $filter = hougarden_region_search_filter($row);
           $filterLabel = $filter === [] ? '—' : http_build_query($filter);
@@ -175,11 +175,7 @@ require dirname(__DIR__) . '/includes/admin-header.php';
         ?>
         <tr>
           <td style="width:3.5rem;">
-            <?php if ($thumbUrl !== ''): ?>
-              <img src="<?= e($thumbUrl) ?>" alt="" style="width:2.75rem;height:2.75rem;object-fit:cover;border-radius:4px;background:#eee;">
-            <?php else: ?>
-              <span class="admin-note">—</span>
-            <?php endif; ?>
+            <img src="<?= e($thumbUrl) ?>" alt="" style="width:2.75rem;height:2.75rem;object-fit:cover;border-radius:4px;background:#eee;">
           </td>
           <td><?= e((string) $row['name']) ?></td>
           <td><?= e((string) $row['sort_order']) ?></td>
@@ -188,46 +184,49 @@ require dirname(__DIR__) . '/includes/admin-header.php';
           <td><?= (int) $usage ?></td>
           <td><?= $isActiveRow ? 'Active' : 'Inactive' ?></td>
           <td>
-            <div class="admin-menu">
-              <button type="button" class="admin-menu__toggle" aria-label="Actions" aria-haspopup="true">⋯</button>
-              <div class="admin-menu__panel" hidden>
-                <a href="<?= e(base_url('admin/regions.php?id=' . (int) $row['id'])) ?>">Edit</a>
-                <?php if ($isActiveRow): ?>
-                  <?php if ($usage === 0): ?>
-                    <form method="post" onsubmit="return confirm('Deactivate this region?');">
-                      <?= csrf_field() ?>
-                      <input type="hidden" name="action" value="deactivate">
-                      <input type="hidden" name="id" value="<?= e((string) $row['id']) ?>">
-                      <button type="submit">Deactivate</button>
-                    </form>
-                  <?php else: ?>
-                    <span class="admin-note" style="display:block;padding:0.5rem 0.85rem;">Has listings — cannot deactivate</span>
-                  <?php endif; ?>
-                <?php else: ?>
-                  <form method="post">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="action" value="activate">
-                    <input type="hidden" name="id" value="<?= e((string) $row['id']) ?>">
-                    <button type="submit">Activate</button>
-                  </form>
-                  <?php if ($usage === 0): ?>
-                    <form method="post" onsubmit="return confirm('Permanently delete this deactivated region? This cannot be undone.');">
-                      <?= csrf_field() ?>
-                      <input type="hidden" name="action" value="delete">
-                      <input type="hidden" name="id" value="<?= e((string) $row['id']) ?>">
-                      <button type="submit">Delete permanently</button>
-                    </form>
-                  <?php endif; ?>
-                <?php endif; ?>
-              </div>
-            </div>
+            <?php require dirname(__DIR__) . '/includes/partials/admin-region-menu.php'; ?>
           </td>
         </tr>
       <?php endforeach; ?>
       </tbody>
     </table>
-  <?php endif; ?>
+</section>
+
+<div class="admin-accordion-cards">
+  <?php foreach ($rows as $row): ?>
+    <?php
+      $thumbUrl = hougarden_region_card_image($row);
+      $usage = taxonomy_region_listing_count($row);
+      $filter = hougarden_region_search_filter($row);
+      $filterLabel = $filter === [] ? '—' : http_build_query($filter);
+      $isActiveRow = !empty($row['is_active']);
+      $cardId = 'admin-region-card-' . (int) $row['id'];
+    ?>
+    <article class="admin-accordion-card">
+      <button type="button" class="admin-accordion-card__head" aria-expanded="false" aria-controls="<?= e($cardId) ?>">
+        <span class="admin-accordion-card__thumb admin-accordion-card__thumb--wide">
+          <img src="<?= e($thumbUrl) ?>" alt="">
+        </span>
+        <span class="admin-accordion-card__summary">
+          <strong><?= e((string) $row['name']) ?></strong>
+          <span class="admin-muted"><?= $isActiveRow ? 'Active' : 'Inactive' ?> · <?= (int) $usage ?> listings</span>
+        </span>
+        <span class="material-symbols-outlined admin-accordion-card__chevron" aria-hidden="true">expand_more</span>
+      </button>
+      <div class="admin-accordion-card__body" id="<?= e($cardId) ?>" hidden>
+        <div class="admin-accordion-card__details">
+          <span class="admin-muted">Homepage: <?= !empty($row['is_featured']) ? 'Yes' : 'No' ?></span>
+          <span class="admin-muted">Sort: <?= e((string) $row['sort_order']) ?></span>
+          <span class="admin-muted">Filter: <?= e($filterLabel) ?></span>
+        </div>
+        <div class="admin-accordion-card__actions">
+          <?php require dirname(__DIR__) . '/includes/partials/admin-region-menu.php'; ?>
+        </div>
+      </div>
+    </article>
+  <?php endforeach; ?>
 </div>
+<?php endif; ?>
 
 <div class="admin-modal<?= $openModal ? ' is-open' : '' ?>" id="region-modal" role="dialog" aria-modal="true" aria-labelledby="region-modal-title">
   <div class="admin-modal__backdrop" data-modal-close></div>

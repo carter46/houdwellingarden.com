@@ -77,11 +77,12 @@ require dirname(__DIR__) . '/includes/admin-header.php';
 <?php if ($ok): ?><div class="admin-alert admin-alert--ok"><?= e($ok) ?></div><?php endif; ?>
 <?php foreach ($errors as $err): ?><div class="admin-alert admin-alert--error"><?= e($err) ?></div><?php endforeach; ?>
 
+<?php if ($rows === []): ?>
 <div class="admin-panel">
-  <h2>All types</h2>
-  <?php if ($rows === []): ?>
-    <p class="admin-note">No property types yet. Use “Add type” to create one.</p>
-  <?php else: ?>
+  <p class="admin-note" style="margin:0;">No property types yet. Use “Add type”.</p>
+</div>
+<?php else: ?>
+<section class="admin-panel admin-panel--flush admin-table-only">
     <table class="admin-table">
       <thead><tr><th>Name</th><th>Slug</th><th>Sort</th><th>Status</th><th>In use</th><th></th></tr></thead>
       <tbody>
@@ -92,35 +93,37 @@ require dirname(__DIR__) . '/includes/admin-header.php';
           <td><?= e((string) $row['sort_order']) ?></td>
           <td><?= !empty($row['is_active']) ? 'Active' : 'Inactive' ?></td>
           <td><?= e((string) taxonomy_type_usage_count((int) $row['id'])) ?></td>
-          <td>
-            <div class="admin-menu">
-              <button type="button" class="admin-menu__toggle" aria-label="Actions" aria-haspopup="true">⋯</button>
-              <div class="admin-menu__panel" hidden>
-                <a href="<?= e(base_url('admin/property-types.php?id=' . (int) $row['id'])) ?>">Edit</a>
-                <?php if (!empty($row['is_active'])): ?>
-                  <form method="post" onsubmit="return confirm('Deactivate this type?');">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="action" value="deactivate">
-                    <input type="hidden" name="id" value="<?= e((string) $row['id']) ?>">
-                    <button type="submit">Deactivate</button>
-                  </form>
-                <?php else: ?>
-                  <form method="post">
-                    <?= csrf_field() ?>
-                    <input type="hidden" name="action" value="activate">
-                    <input type="hidden" name="id" value="<?= e((string) $row['id']) ?>">
-                    <button type="submit">Activate</button>
-                  </form>
-                <?php endif; ?>
-              </div>
-            </div>
-          </td>
+          <td><?php require dirname(__DIR__) . '/includes/partials/admin-type-menu.php'; ?></td>
         </tr>
       <?php endforeach; ?>
       </tbody>
     </table>
-  <?php endif; ?>
+</section>
+
+<div class="admin-accordion-cards">
+  <?php foreach ($rows as $row): ?>
+    <?php $cardId = 'admin-type-card-' . (int) $row['id']; ?>
+    <article class="admin-accordion-card">
+      <button type="button" class="admin-accordion-card__head" aria-expanded="false" aria-controls="<?= e($cardId) ?>">
+        <span class="admin-accordion-card__summary">
+          <strong><?= e((string) $row['name']) ?></strong>
+          <span class="admin-muted"><?= !empty($row['is_active']) ? 'Active' : 'Inactive' ?> · <?= e((string) taxonomy_type_usage_count((int) $row['id'])) ?> in use</span>
+        </span>
+        <span class="material-symbols-outlined admin-accordion-card__chevron" aria-hidden="true">expand_more</span>
+      </button>
+      <div class="admin-accordion-card__body" id="<?= e($cardId) ?>" hidden>
+        <div class="admin-accordion-card__details">
+          <span class="admin-muted">Slug: <?= e((string) $row['slug']) ?></span>
+          <span class="admin-muted">Sort: <?= e((string) $row['sort_order']) ?></span>
+        </div>
+        <div class="admin-accordion-card__actions">
+          <?php require dirname(__DIR__) . '/includes/partials/admin-type-menu.php'; ?>
+        </div>
+      </div>
+    </article>
+  <?php endforeach; ?>
 </div>
+<?php endif; ?>
 
 <div class="admin-modal<?= $openModal ? ' is-open' : '' ?>" id="type-modal" role="dialog" aria-modal="true" aria-labelledby="type-modal-title">
   <div class="admin-modal__backdrop" data-modal-close></div>
