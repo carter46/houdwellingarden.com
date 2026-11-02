@@ -8,8 +8,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/hougarden-locations.php';
 
 $label = (string) ($collection['name'] ?? '');
-$imgPath = trim((string) ($collection['image_path'] ?? ''));
-$imgUrl = $imgPath !== '' ? media_url($imgPath) : hougarden_region_card_image($collection);
+$imgUrl = hougarden_region_card_image($collection);
 $filter = hougarden_region_search_filter($collection);
 $href = $filter !== []
     ? base_url('properties.php?' . http_build_query($filter))

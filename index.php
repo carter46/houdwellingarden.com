@@ -27,19 +27,8 @@ try {
         $label = (string) $market['label'];
         $filter = $market['filter'];
         $count = property_count_public($filter);
-        $rows = property_list_public($filter, 'newest', 1, 0);
+        // Homepage location tiles use the region image from Admin → Regions (not a random listing photo).
         $image = (string) ($market['image'] ?? '');
-        if ($rows !== []) {
-            $cover = trim((string) ($rows[0]['cover_path'] ?? $rows[0]['image_path'] ?? ''));
-            if ($cover !== '' && !preg_match('#^https?://#i', $cover)) {
-                $rel = ltrim(str_replace('\\', '/', $cover), '/');
-                if (is_file(APP_ROOT . '/' . $rel)) {
-                    $image = media_url($cover);
-                }
-            } elseif ($cover !== '' && preg_match('#^https?://#i', $cover)) {
-                $image = $cover;
-            }
-        }
         if ($image === '') {
             $image = hougarden_location_fallback_image($label);
         }
