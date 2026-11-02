@@ -1,19 +1,16 @@
 -- HouGarden full deploy (schema + data). Import in phpMyAdmin (database already selected).
--- Generated: 2026-11-03T09:52:31+11:00
+-- Generated: 2026-11-03T09:55:11+11:00
 -- Properties: 33
 -- No admin user — create via admin/setup.php after import.
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
-﻿-- HouGarden / houdwellingarden.com — CANONICAL DATABASE SCHEMA (single file for new installs)
+-- HouGarden / houdwellingarden.com — CANONICAL DATABASE SCHEMA (single file for new installs)
 -- MySQL 8.0+ / MariaDB 10.4+ recommended. No seeded admin passwords.
 --
--- phpMyAdmin deploy (your workflow):
---   1. Create the database in the hosting panel.
---   2. Select that database → Import THIS FILE ONLY for structure.
---   3. Optional: seed.sql (Colorado demo data — skip on production).
---   4. Load AU listings: php scripts/apply-hougarden-manifest.php + upload uploads/properties/
+-- phpMyAdmin (InfinityFree / production): import database/hougarden-deploy.sql — NOT this file alone.
+-- This file is structure-only for developers. hougarden-deploy.sql = schema + 33 AU listings + data.
 --
 -- Upgrading an OLD database: do NOT re-import this file (it DROPs tables). Deploy new PHP code;
 -- open Admin once — includes/schema-migrate.php applies pending steps (see settings.schema_version).

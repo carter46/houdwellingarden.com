@@ -50,7 +50,14 @@ $buf .= "-- Properties: {$propCount}\n";
 $buf .= "-- No admin user — create via admin/setup.php after import.\n\n";
 $buf .= "SET NAMES utf8mb4;\n";
 $buf .= "SET FOREIGN_KEY_CHECKS = 0;\n\n";
-$buf .= file_get_contents($schemaPath);
+$schemaSql = file_get_contents($schemaPath);
+if ($schemaSql === false) {
+    fwrite(STDERR, "Could not read {$schemaPath}\n");
+    exit(1);
+}
+$schemaSql = preg_replace('/^\xEF\xBB\xBF/', '', $schemaSql) ?? $schemaSql;
+$schemaSql = str_replace("\xEF\xBB\xBF", '', $schemaSql);
+$buf .= $schemaSql;
 $buf .= "\n\n-- ========== DATA (HouGarden AU) ==========\n\n";
 
 foreach ($tablesData as $table) {
