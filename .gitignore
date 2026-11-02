@@ -1,4 +1,5 @@
 # Local secrets — never commit
+/config.php
 /config.local.php
 /config.local.production.php
 
