@@ -25,7 +25,6 @@ require dirname(__DIR__) . '/includes/admin-header.php';
 ?>
 <span class="admin-eyebrow">Overview</span>
 <h1 class="admin-page-title">Dashboard</h1>
-<p class="admin-page-lead">Live counts from MySQL for <?= e(site_name()) ?>.</p>
 
 <?php if ($flashOk): ?>
     <div class="admin-alert admin-alert--ok"><?= e($flashOk) ?></div>
@@ -40,7 +39,7 @@ require dirname(__DIR__) . '/includes/admin-header.php';
     <div class="admin-kpi">
         <div class="admin-kpi__label">Total Listings</div>
         <p class="admin-kpi__value"><?= e((string) $totalListings) ?></p>
-        <div class="admin-kpi__meta">Excludes archived</div>
+        <div class="admin-kpi__meta">Active listings</div>
     </div>
     <div class="admin-kpi">
         <div class="admin-kpi__label">Total Inquiries</div>
@@ -50,7 +49,7 @@ require dirname(__DIR__) . '/includes/admin-header.php';
     <div class="admin-kpi">
         <div class="admin-kpi__label">Active Agents</div>
         <p class="admin-kpi__value"><?= e((string) $activeAgents) ?></p>
-        <div class="admin-kpi__meta">From agents table</div>
+        <div class="admin-kpi__meta">On site</div>
     </div>
     <div class="admin-kpi">
         <div class="admin-kpi__label">Listing status</div>
@@ -59,12 +58,5 @@ require dirname(__DIR__) . '/includes/admin-header.php';
     </div>
 </div>
 
-<section class="admin-panel">
-    <h2>Quick links</h2>
-    <p class="admin-note">
-        Use Manage Properties for CRUD and gallery uploads. Inquiries covers contact and property leads.
-        For readiness checks run <code>php bin/smoke.php</code> or open <code>health.php</code> (admin / token / local debug).
-    </p>
-</section>
 <?php
 require dirname(__DIR__) . '/includes/admin-footer.php';

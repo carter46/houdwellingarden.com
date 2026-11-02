@@ -5,6 +5,53 @@ declare(strict_types=1);
 </div>
 <script>
 (function () {
+  var body = document.body;
+  var navToggle = document.querySelector('.admin-nav-toggle');
+  var navBackdrop = document.querySelector('.admin-nav-backdrop');
+  var sidebar = document.getElementById('admin-sidebar');
+
+  function setNavOpen(open) {
+    if (!navToggle) return;
+    body.classList.toggle('admin-nav-open', open);
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    if (navBackdrop) {
+      navBackdrop.hidden = !open;
+    }
+  }
+
+  if (navToggle) {
+    navToggle.addEventListener('click', function () {
+      setNavOpen(!body.classList.contains('admin-nav-open'));
+    });
+  }
+  if (navBackdrop) {
+    navBackdrop.addEventListener('click', function () {
+      setNavOpen(false);
+    });
+  }
+  if (sidebar) {
+    sidebar.querySelectorAll('.admin-sidebar__link').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (window.matchMedia('(max-width: 899px)').matches) {
+          setNavOpen(false);
+        }
+      });
+    });
+  }
+
+  document.querySelectorAll('.admin-property-card__head').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var panelId = btn.getAttribute('aria-controls');
+      var panel = panelId ? document.getElementById(panelId) : null;
+      if (!panel) return;
+      var open = panel.hidden;
+      panel.hidden = !open;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.classList.toggle('is-open', open);
+    });
+  });
+
   function closeMenus(exceptPanel) {
     document.querySelectorAll('.admin-menu__panel').forEach(function (panel) {
       if (panel !== exceptPanel) {

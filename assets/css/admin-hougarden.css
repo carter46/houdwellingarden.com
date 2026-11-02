@@ -181,3 +181,26 @@ body.hougarden-admin .admin-topbar__link {
   letter-spacing: 0;
   font-size: 0.8125rem;
 }
+
+body.hougarden-admin .admin-nav-toggle {
+  border-color: var(--outline);
+  border-radius: 8px;
+}
+
+body.hougarden-admin .admin-sidebar__head .admin-topbar__mark {
+  flex-shrink: 0;
+}
+
+body.hougarden-admin .admin-property-card {
+  border-color: var(--outline);
+  border-radius: 8px;
+}
+
+body.hougarden-admin .admin-property-card__head {
+  border-radius: 0;
+}
+
+body.hougarden-admin .admin-sidebar__signout {
+  text-transform: none;
+  letter-spacing: 0;
+}

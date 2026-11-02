@@ -70,10 +70,16 @@ require dirname(__DIR__) . '/includes/admin-header.php';
 </form>
 
 <?php if ($viewArchived): ?>
-  <p class="admin-note" style="margin-top:-0.5rem;">Archived listings are hidden from the public site. Permanent delete removes the property, gallery rows, and image files from the server.</p>
+  <p class="admin-note admin-note--compact" style="margin-top:-0.5rem;">Not shown on the public site.</p>
 <?php endif; ?>
 
-<section class="admin-panel" style="padding:0;overflow:visible;">
+<?php if ($rows === []): ?>
+<section class="admin-panel">
+    <p class="admin-note" style="margin:0;"><?= $viewArchived ? 'No archived properties.' : 'No properties match these filters.' ?></p>
+</section>
+<?php else: ?>
+
+<section class="admin-panel admin-panel--flush admin-table-only">
     <table class="admin-table">
         <thead>
             <tr>
@@ -82,14 +88,10 @@ require dirname(__DIR__) . '/includes/admin-header.php';
                 <th>Price</th>
                 <th>Status</th>
                 <th>Featured</th>
-                <th>Listed</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-        <?php if ($rows === []): ?>
-            <tr><td colspan="7" class="admin-note" style="padding:1.25rem;"><?= $viewArchived ? 'No archived properties.' : 'No properties match these filters.' ?></td></tr>
-        <?php else: ?>
             <?php foreach ($rows as $row): ?>
                 <?php
                 $id = (int) $row['id'];
@@ -101,6 +103,12 @@ require dirname(__DIR__) . '/includes/admin-header.php';
                 );
                 $public = is_property_status_public((string) $row['status']);
                 $isArchived = ((string) ($row['status'] ?? '')) === 'archived';
+                $listedRaw = trim((string) ($row['listed_at'] ?? ''));
+                $listedLabel = '—';
+                if ($listedRaw !== '') {
+                    $listedTs = strtotime($listedRaw);
+                    $listedLabel = $listedTs !== false ? date('j M Y', $listedTs) : $listedRaw;
+                }
                 ?>
                 <tr>
                     <td class="admin-table__thumb">
@@ -114,39 +122,67 @@ require dirname(__DIR__) . '/includes/admin-header.php';
                         <span class="admin-muted"><?= e((string) ($row['reference_code'] ?? '')) ?><?= !empty($row['mls_number']) ? ' · MLS# ' . e((string) $row['mls_number']) : '' ?></span>
                     </td>
                     <td><?= e($priceLabel) ?></td>
-                    <td><span class="admin-badge"><?= e(str_replace('_', ' ', (string) $row['status'])) ?></span></td>
-                    <td><?= !empty($row['is_featured']) ? 'Yes' : '—' ?></td>
-                    <td><?= e((string) ($row['listed_at'] ?? '—')) ?></td>
                     <td>
-                        <div class="admin-menu">
-                            <button type="button" class="admin-menu__toggle" aria-label="Actions" aria-haspopup="true">⋯</button>
-                            <div class="admin-menu__panel" hidden>
-                                <a href="<?= e(base_url('admin/property-form.php?id=' . $id)) ?>">Edit</a>
-                                <?php if ($public): ?>
-                                    <a href="<?= e(base_url('property.php?slug=' . rawurlencode((string) $row['slug']))) ?>" target="_blank" rel="noopener">View on site</a>
-                                <?php endif; ?>
-                                <?php if (!$isArchived): ?>
-                                    <form method="post" action="<?= e(base_url('admin/property-archive.php')) ?>" onsubmit="return confirm('Archive this listing?');">
-                                        <?= csrf_field() ?>
-                                        <input type="hidden" name="id" value="<?= $id ?>">
-                                        <button type="submit">Archive</button>
-                                    </form>
-                                <?php else: ?>
-                                    <form method="post" action="<?= e(base_url('admin/property-delete.php')) ?>" onsubmit="var t=prompt('This permanently deletes the property and all images. Type DELETE to confirm.'); if(t!=='DELETE'){return false;} this.querySelector('[name=confirm]').value=t; return true;">
-                                        <?= csrf_field() ?>
-                                        <input type="hidden" name="id" value="<?= $id ?>">
-                                        <input type="hidden" name="confirm" value="">
-                                        <button type="submit">Delete permanently</button>
-                                    </form>
-                                <?php endif; ?>
-                            </div>
-                        </div>
+                        <span class="admin-badge"><?= e(str_replace('_', ' ', (string) $row['status'])) ?></span>
+                        <span class="admin-muted admin-listed-date"><?= e($listedLabel) ?></span>
+                    </td>
+                    <td><?= !empty($row['is_featured']) ? 'Yes' : '—' ?></td>
+                    <td>
+                        <?php require dirname(__DIR__) . '/includes/partials/admin-property-menu.php'; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
-        <?php endif; ?>
         </tbody>
     </table>
 </section>
+
+<div class="admin-property-cards">
+    <?php foreach ($rows as $row): ?>
+        <?php
+        $id = (int) $row['id'];
+        $cover = (string) ($row['cover_path'] ?? '');
+        $priceLabel = format_price(
+            isset($row['price']) ? (float) $row['price'] : null,
+            !empty($row['price_on_request']),
+            (string) ($row['currency'] ?? 'USD')
+        );
+        $public = is_property_status_public((string) $row['status']);
+        $isArchived = ((string) ($row['status'] ?? '')) === 'archived';
+        $listedRaw = trim((string) ($row['listed_at'] ?? ''));
+        $listedLabel = '—';
+        if ($listedRaw !== '') {
+            $listedTs = strtotime($listedRaw);
+            $listedLabel = $listedTs !== false ? date('j M Y', $listedTs) : $listedRaw;
+        }
+        $cardId = 'admin-property-card-' . $id;
+        ?>
+        <article class="admin-property-card">
+            <button type="button" class="admin-property-card__head" aria-expanded="false" aria-controls="<?= e($cardId) ?>">
+                <span class="admin-property-card__thumb">
+                    <?php if ($cover !== ''): ?>
+                        <img src="<?= e(media_url($cover)) ?>" alt="">
+                    <?php endif; ?>
+                </span>
+                <span class="admin-property-card__summary">
+                    <strong><?= e((string) $row['title']) ?></strong>
+                    <span class="admin-muted"><?= e(trim(($row['city'] ?? '') . ' ' . ($row['postal_code'] ?? ''))) ?></span>
+                    <span class="admin-property-card__price"><?= e($priceLabel) ?></span>
+                </span>
+                <span class="material-symbols-outlined admin-property-card__chevron" aria-hidden="true">expand_more</span>
+            </button>
+            <div class="admin-property-card__body" id="<?= e($cardId) ?>" hidden>
+                <p class="admin-property-card__meta">
+                    <span class="admin-badge"><?= e(str_replace('_', ' ', (string) $row['status'])) ?></span>
+                    <span class="admin-muted admin-listed-date"><?= e($listedLabel) ?></span>
+                </p>
+                <p class="admin-muted"><?= e((string) ($row['reference_code'] ?? '')) ?><?= !empty($row['is_featured']) ? ' · Featured' : '' ?></p>
+                <div class="admin-property-card__actions">
+                    <?php require dirname(__DIR__) . '/includes/partials/admin-property-menu.php'; ?>
+                </div>
+            </div>
+        </article>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
 <?php
 require dirname(__DIR__) . '/includes/admin-footer.php';

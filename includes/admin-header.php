@@ -30,23 +30,12 @@ $user = auth_user();
 </head>
 <body class="admin-body hougarden-admin">
 <header class="admin-topbar">
-    <div class="admin-topbar__brand">
-        <div class="admin-topbar__mark" aria-hidden="true">h</div>
-        <div class="admin-topbar__titles">
-            <span class="admin-eyebrow">Admin</span>
-            <span class="admin-topbar__subtitle"><?= e($appName) ?></span>
-        </div>
-    </div>
-    <div class="admin-topbar__meta">
-        <?php if ($user): ?>
-            <span class="admin-topbar__user"><?= e((string) ($user['name'] ?: $user['email'])) ?></span>
-        <?php endif; ?>
-        <form class="admin-logout-form" method="post" action="<?= e(base_url('admin/logout.php')) ?>">
-            <?= csrf_field() ?>
-            <button class="admin-topbar__link" type="submit">Sign out</button>
-        </form>
-    </div>
+    <button type="button" class="admin-nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="admin-sidebar">
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+    </button>
+    <p class="admin-topbar__title"><?= e($adminPageTitle) ?></p>
 </header>
 <div class="admin-shell">
+<button type="button" class="admin-nav-backdrop" aria-label="Close menu" hidden></button>
 <?php require __DIR__ . '/admin-nav.php'; ?>
 <main class="admin-main">
