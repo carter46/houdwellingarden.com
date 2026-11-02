@@ -1,7 +1,16 @@
-# Local secrets — never commit
+# Config with secrets / local-only overrides — create on each machine from *.example (not for git)
 /config.php
 /config.local.php
 /config.local.production.php
+/config.infinityfree.php
+/config.*.local.php
+/config.php.bak
+/config.local.php.bak
+/config.local.production.php.bak
+# Keep templates in repo:
+!/config.local.php.example
+!/config.local.production.php.example
+!/config.infinityfree.php.example
 
 # Composer dependencies — installed by the host on deploy (composer install)
 /vendor/
