@@ -1,12 +1,12 @@
 -- HouGarden full deploy (schema + data). Import in phpMyAdmin (database already selected).
--- Generated: 2026-11-02T09:30:54+11:00
+-- Generated: 2026-11-03T09:52:31+11:00
 -- Properties: 33
 -- No admin user — create via admin/setup.php after import.
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
--- HouGarden / houdwellingarden.com — CANONICAL DATABASE SCHEMA (single file for new installs)
+﻿-- HouGarden / houdwellingarden.com — CANONICAL DATABASE SCHEMA (single file for new installs)
 -- MySQL 8.0+ / MariaDB 10.4+ recommended. No seeded admin passwords.
 --
 -- phpMyAdmin deploy (your workflow):
@@ -104,6 +104,8 @@ CREATE TABLE `regions` (
   `is_active` TINYINT(1) NOT NULL DEFAULT 1,
   `is_featured` TINYINT(1) NOT NULL DEFAULT 0,
   `image_path` VARCHAR(500) NULL DEFAULT NULL,
+  `home_filter_key` VARCHAR(16) NULL DEFAULT NULL COMMENT 'location|market — homepage Locations filter',
+  `home_filter_value` VARCHAR(120) NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_regions_slug` (`slug`),
   KEY `idx_regions_active` (`is_active`, `sort_order`),
@@ -293,30 +295,27 @@ CREATE TABLE `settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
+
+
 -- ========== DATA (HouGarden AU) ==========
 
 DELETE FROM `property_types`;
 INSERT INTO `property_types` (`id`, `slug`, `name`, `sort_order`, `is_active`) VALUES
-(1, 'estate', 'Estate', 10, 1),
-(2, 'condo', 'Luxury Condo', 20, 1),
-(3, 'ranch', 'Ranch', 30, 1),
-(4, 'chalet', 'Chalet', 40, 1),
-(5, 'single_family', 'Single Family', 50, 1),
-(6, 'land', 'Land', 60, 1);
+(1, 'estate', 'Estate', 10, 0),
+(2, 'condo', 'Apartment', 20, 1),
+(3, 'ranch', 'Ranch', 30, 0),
+(4, 'chalet', 'Chalet', 40, 0),
+(5, 'single_family', 'House', 50, 1),
+(6, 'land', 'Land', 60, 1),
+(9, 'townhouse', 'Townhouse', 30, 1);
 
 DELETE FROM `regions`;
-INSERT INTO `regions` (`id`, `slug`, `name`, `sort_order`, `is_active`, `is_featured`, `image_path`) VALUES
-(1, 'aspen', 'Aspen', 10, 1, 1, 'assets/img/collection-aspen.jpg'),
-(2, 'vail', 'Vail', 20, 1, 1, 'assets/img/collection-vail.jpg'),
-(3, 'beaver-creek', 'Beaver Creek', 30, 1, 1, 'assets/img/collection-beaver-creek.jpg'),
-(4, 'telluride', 'Telluride', 40, 1, 0, NULL),
-(5, 'snowmass', 'Snowmass', 50, 1, 0, NULL),
-(6, 'steamboat', 'Steamboat', 60, 1, 0, NULL),
-(7, 'denver-metro', 'Denver Metro', 110, 1, 1, 'uploads/regions/denver-metro.jpg'),
-(8, 'phoenix-metro', 'Phoenix Metro', 100, 1, 1, 'uploads/regions/phoenix-metro.jpg'),
-(9, 'austin-metro', 'Austin Metro', 120, 1, 1, 'uploads/regions/austin-metro.jpg'),
-(10, 'central-florida', 'Central Florida', 130, 1, 1, 'uploads/regions/central-florida.jpg'),
-(11, 'atlanta-metro', 'Atlanta Metro', 140, 1, 1, 'uploads/regions/atlanta-metro.jpg');
+INSERT INTO `regions` (`id`, `slug`, `name`, `sort_order`, `is_active`, `is_featured`, `image_path`, `home_filter_key`, `home_filter_value`) VALUES
+(13, 'bellevue-hill', 'Bellevue Hill', 10, 1, 1, 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=800&q=80', 'location', 'Bellevue Hill'),
+(14, 'rose-bay', 'Rose Bay', 20, 1, 1, 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&fit=crop&w=800&q=80', 'location', 'Rose Bay'),
+(15, 'south-yarra', 'South Yarra', 30, 1, 1, 'https://images.unsplash.com/photo-1514395462725-fb8496db94a8?auto=format&fit=crop&w=800&q=80', 'location', 'South Yarra'),
+(16, 'ocean-grove', 'Ocean Grove', 40, 1, 1, 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&q=80', 'location', 'Ocean Grove'),
+(17, 'victoria', 'Victoria', 50, 1, 1, 'https://images.unsplash.com/photo-1519864607624-a07bb8c2477e?auto=format&fit=crop&w=800&q=80', 'market', 'victoria');
 
 DELETE FROM `amenities`;
 INSERT INTO `amenities` (`id`, `slug`, `name`, `category`, `sort_order`, `is_active`) VALUES
@@ -346,7 +345,7 @@ INSERT INTO `offices` (`id`, `name`, `address_line`, `city`, `region`, `postal_c
 DELETE FROM `settings`;
 INSERT INTO `settings` (`setting_key`, `setting_value`, `updated_at`) VALUES
 ('mail_from_name', NULL, '2026-11-01 02:17:46'),
-('schema_version', '6', '2026-11-01 17:18:25'),
+('schema_version', '8', '2026-11-02 23:52:26'),
 ('site_email', 'hello@houdwellingarden.com', '2026-11-01 02:17:59'),
 ('site_favicon_path', NULL, '2026-11-01 02:17:46'),
 ('site_logo_path', NULL, '2026-11-01 02:17:46'),

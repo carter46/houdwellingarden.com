@@ -164,7 +164,9 @@ function taxonomy_region_save(
     bool $isFeatured = false,
     ?int $sortOrder = null,
     ?string $imagePath = null,
-    bool $clearImage = false
+    bool $clearImage = false,
+    ?string $homeFilterKey = null,
+    ?string $homeFilterValue = null
 ): array {
     $name = trim($name);
     $slug = slugify($slug !== '' ? $slug : $name);
@@ -201,8 +203,43 @@ function taxonomy_region_save(
             $nextImage = $imagePath;
         }
 
+        $filterKey = taxonomy_normalize_home_filter_key($homeFilterKey);
+        $filterVal = trim((string) ($homeFilterValue ?? ''));
+        if ($filterKey === null) {
+            $filterVal = '';
+        }
+        if ($filterKey === null && $isFeatured) {
+            $filterKey = strcasecmp($name, 'Victoria') === 0 ? 'market' : 'location';
+            $filterVal = $filterKey === 'market' ? 'victoria' : $name;
+        }
+        if ($filterKey === 'location' && $filterVal === '') {
+            $filterVal = $name;
+        }
+        if ($filterKey === 'market' && $filterVal === '') {
+            $filterVal = 'victoria';
+        }
+
+        if (!schema_column_exists(db(), 'regions', 'home_filter_key')) {
+            db()->prepare(
+                'UPDATE regions SET name = ?, slug = ?, sort_order = ?, is_active = ?, is_featured = ?, image_path = ? WHERE id = ?'
+            )->execute([
+                $name,
+                $slug,
+                $nextSort,
+                $isActive ? 1 : 0,
+                $isFeatured ? 1 : 0,
+                $nextImage !== '' ? $nextImage : null,
+                $id,
+            ]);
+            if ($oldName !== '' && $oldName !== $name) {
+                db()->prepare('UPDATE properties SET region = ? WHERE region = ?')->execute([$name, $oldName]);
+            }
+            return ['ok' => true, 'error' => null, 'id' => $id];
+        }
+
         db()->prepare(
-            'UPDATE regions SET name = ?, slug = ?, sort_order = ?, is_active = ?, is_featured = ?, image_path = ? WHERE id = ?'
+            'UPDATE regions SET name = ?, slug = ?, sort_order = ?, is_active = ?, is_featured = ?, image_path = ?,
+             home_filter_key = ?, home_filter_value = ? WHERE id = ?'
         )->execute([
             $name,
             $slug,
@@ -210,6 +247,8 @@ function taxonomy_region_save(
             $isActive ? 1 : 0,
             $isFeatured ? 1 : 0,
             $nextImage !== '' ? $nextImage : null,
+            $filterKey,
+            $filterVal !== '' ? $filterVal : null,
             $id,
         ]);
         // Keep property.region text in sync when renaming.
@@ -220,8 +259,39 @@ function taxonomy_region_save(
     }
 
     $sortOrder = $sortOrder !== null ? $sortOrder : taxonomy_next_sort_order('regions');
+    $filterKey = taxonomy_normalize_home_filter_key($homeFilterKey);
+    $filterVal = trim((string) ($homeFilterValue ?? ''));
+    if ($filterKey === null) {
+        $filterVal = '';
+    }
+    if ($filterKey === null && $isFeatured) {
+        $filterKey = strcasecmp($name, 'Victoria') === 0 ? 'market' : 'location';
+        $filterVal = $filterKey === 'market' ? 'victoria' : $name;
+    }
+    if ($filterKey === 'location' && $filterVal === '') {
+        $filterVal = $name;
+    }
+    if ($filterKey === 'market' && $filterVal === '') {
+        $filterVal = 'victoria';
+    }
+
+    if (!schema_column_exists(db(), 'regions', 'home_filter_key')) {
+        db()->prepare(
+            'INSERT INTO regions (name, slug, sort_order, is_active, is_featured, image_path) VALUES (?, ?, ?, ?, ?, ?)'
+        )->execute([
+            $name,
+            $slug,
+            $sortOrder,
+            $isActive ? 1 : 0,
+            $isFeatured ? 1 : 0,
+            ($imagePath !== null && $imagePath !== '') ? $imagePath : null,
+        ]);
+        return ['ok' => true, 'error' => null, 'id' => (int) db()->lastInsertId()];
+    }
+
     db()->prepare(
-        'INSERT INTO regions (name, slug, sort_order, is_active, is_featured, image_path) VALUES (?, ?, ?, ?, ?, ?)'
+        'INSERT INTO regions (name, slug, sort_order, is_active, is_featured, image_path, home_filter_key, home_filter_value)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     )->execute([
         $name,
         $slug,
@@ -229,8 +299,40 @@ function taxonomy_region_save(
         $isActive ? 1 : 0,
         $isFeatured ? 1 : 0,
         ($imagePath !== null && $imagePath !== '') ? $imagePath : null,
+        $filterKey,
+        $filterVal !== '' ? $filterVal : null,
     ]);
     return ['ok' => true, 'error' => null, 'id' => (int) db()->lastInsertId()];
+}
+
+function taxonomy_normalize_home_filter_key(?string $key): ?string
+{
+    $key = strtolower(trim((string) $key));
+    if ($key === 'location' || $key === 'market') {
+        return $key;
+    }
+
+    return null;
+}
+
+/**
+ * Listings matching this region's homepage search filter (city / market), not the legacy region text field.
+ */
+function taxonomy_region_listing_count(array $region): int
+{
+    require_once __DIR__ . '/hougarden-locations.php';
+    if (!function_exists('property_count_public')) {
+        return taxonomy_region_usage_count((int) ($region['id'] ?? 0));
+    }
+    $filter = hougarden_region_search_filter($region);
+    if ($filter === []) {
+        return taxonomy_region_usage_count((int) ($region['id'] ?? 0));
+    }
+    try {
+        return property_count_public($filter);
+    } catch (Throwable $e) {
+        return 0;
+    }
 }
 
 function taxonomy_region_deactivate(int $id): void
@@ -249,11 +351,11 @@ function taxonomy_region_deactivate_safe(int $id): array
     if ($row === null) {
         return ['ok' => false, 'error' => 'Region not found.'];
     }
-    $used = taxonomy_region_usage_count($id);
+    $used = taxonomy_region_listing_count($row);
     if ($used > 0) {
         return [
             'ok' => false,
-            'error' => 'Cannot deactivate: ' . $used . ' listing' . ($used === 1 ? '' : 's') . ' still use this region. Reassign or remove those listings first.',
+            'error' => 'Cannot deactivate: ' . $used . ' listing' . ($used === 1 ? '' : 's') . ' match this location filter. Reassign or remove those listings first.',
         ];
     }
     taxonomy_region_deactivate($id);
@@ -274,11 +376,11 @@ function taxonomy_region_delete_permanent(int $id): array
     if (!empty($row['is_active'])) {
         return ['ok' => false, 'error' => 'Only deactivated regions can be deleted. Deactivate it first.'];
     }
-    $used = taxonomy_region_usage_count($id);
+    $used = taxonomy_region_listing_count($row);
     if ($used > 0) {
         return [
             'ok' => false,
-            'error' => 'Cannot delete: ' . $used . ' listing' . ($used === 1 ? '' : 's') . ' still use this region.',
+            'error' => 'Cannot delete: ' . $used . ' listing' . ($used === 1 ? '' : 's') . ' match this location filter.',
         ];
     }
 

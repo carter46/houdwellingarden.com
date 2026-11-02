@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/hougarden-shell.php';
+require_once dirname(__DIR__) . '/includes/hougarden-locations.php';
 
 hougarden_ensure_home_feed_columns();
 
@@ -107,6 +108,35 @@ $targetVer = app_schema_target_version();
 echo "Schema version (DB): " . ($schemaVer ?? 'not set') . " · target: {$targetVer}\n";
 if ((int) ($schemaVer ?? 0) < $targetVer) {
     echo "  → Load any page once to apply pending PHP migrations.\n";
+}
+
+echo "\nHomepage locations (Admin → Homepage locations):\n";
+$legacyRegionSlugs = [
+    'aspen', 'vail', 'beaver-creek', 'telluride', 'snowmass', 'steamboat', 'denver-metro',
+    'phoenix-metro', 'austin-metro', 'central-florida', 'atlanta-metro',
+];
+$badRegions = $pdo->query(
+    "SELECT slug, name FROM regions WHERE slug IN ('" . implode("','", $legacyRegionSlugs) . "')"
+)->fetchAll(PDO::FETCH_ASSOC);
+if ($badRegions !== []) {
+    echo "  ISSUE: Legacy Colorado/US regions still in DB — load admin once (migration v7) or re-import hougarden-deploy.sql\n";
+    foreach ($badRegions as $br) {
+        echo "    - {$br['slug']}\n";
+    }
+}
+foreach (hougarden_location_markets() as $market) {
+    $label = (string) $market['label'];
+    $n = property_count_public($market['filter']);
+    echo "  {$label}: {$n} public listing(s)\n";
+}
+
+$inactiveTypes = (int) $pdo->query(
+    "SELECT COUNT(*) FROM property_types WHERE slug IN ('estate','ranch','chalet') AND is_active = 1"
+)->fetchColumn();
+if ($inactiveTypes > 0) {
+    echo "\nISSUE: Legacy property types still active (estate/ranch/chalet). Run migration v7 or deactivate in admin.\n";
+} else {
+    echo "\nProperty types: AU set OK (legacy estate/ranch/chalet inactive).\n";
 }
 
 echo "\nDone.\n";

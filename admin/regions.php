@@ -6,6 +6,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
+require_once dirname(__DIR__) . '/includes/hougarden-locations.php';
 auth_require();
 
 $editId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -96,7 +97,9 @@ if (is_post()) {
                 $isFeatured,
                 $sortOrder,
                 $imagePath,
-                $clearImage
+                $clearImage,
+                (string) ($_POST['home_filter_key'] ?? ''),
+                (string) ($_POST['home_filter_value'] ?? '')
             );
             if (!$result['ok']) {
                 $errors[] = (string) $result['error'];
@@ -105,11 +108,11 @@ if (is_post()) {
                     flash_set(
                         'region_ok',
                         $isActive
-                            ? 'Region updated. Changes are live on the Markets page.'
-                            : 'Region updated. It is inactive, so it is hidden from the Markets page.'
+                            ? 'Location updated. Homepage and Markets will reflect changes immediately.'
+                            : 'Location updated. It is inactive and hidden from the site.'
                     );
                 } else {
-                    flash_set('region_ok', 'Region created. It now appears on the Markets page.');
+                    flash_set('region_ok', 'Location created.');
                 }
                 redirect('admin/regions.php');
             }
@@ -124,6 +127,8 @@ if (is_post()) {
                 'is_active' => $isActive ? 1 : 0,
                 'is_featured' => $isFeatured ? 1 : 0,
                 'image_path' => $imagePath ?? ($editing['image_path'] ?? $prevImage),
+                'home_filter_key' => $_POST['home_filter_key'] ?? '',
+                'home_filter_value' => $_POST['home_filter_value'] ?? '',
             ];
             $openModal = true;
         }
@@ -131,19 +136,19 @@ if (is_post()) {
 }
 
 $rows = regions_all(false);
-$adminPageTitle = 'Regions';
+$adminPageTitle = 'Homepage locations';
 $adminActiveNav = 'regions';
 require dirname(__DIR__) . '/includes/admin-header.php';
 ?>
 <div class="admin-page-head">
   <div>
-    <span class="admin-eyebrow">Taxonomy</span>
-    <h1 class="admin-page-title">Regions</h1>
-    <p class="admin-page-lead">Destinations for listings and filters. Every <strong>Active</strong> region appears on Markets. A region can be deactivated only when it has <strong>no listings</strong>. Deactivated regions with no listings can be permanently deleted.</p>
+    <span class="admin-eyebrow">Homepage</span>
+    <h1 class="admin-page-title">Homepage locations</h1>
+    <p class="admin-page-lead">These rows power the <strong>Locations</strong> section on the homepage and search filters. Turn on <strong>Show on homepage</strong> for each suburb or market. Upload a card image optional — otherwise a default photo is used. Active locations also appear on the Markets page.</p>
   </div>
   <div class="admin-actions" style="gap:0.5rem;">
     <a class="admin-btn admin-btn--ghost" href="<?= e(base_url('markets.php')) ?>" target="_blank" rel="noopener">View Markets page</a>
-    <button type="button" class="admin-btn" data-modal-open="region-modal">Add region</button>
+    <button type="button" class="admin-btn" data-modal-open="region-modal">Add location</button>
   </div>
 </div>
 
@@ -152,18 +157,20 @@ require dirname(__DIR__) . '/includes/admin-header.php';
 <?php foreach ($errors as $err): ?><div class="admin-alert admin-alert--error"><?= e($err) ?></div><?php endforeach; ?>
 
 <div class="admin-panel">
-  <h2>All regions</h2>
+  <h2>All locations</h2>
   <?php if ($rows === []): ?>
-    <p class="admin-note">No regions yet. Use “Add region” or import data manually — schema is created by <code>database/schema.sql</code>.</p>
+    <p class="admin-note">No locations yet. Use “Add location” or import <code>database/hougarden-deploy.sql</code>.</p>
   <?php else: ?>
     <table class="admin-table">
-      <thead><tr><th></th><th>Name</th><th>Sort</th><th>Homepage</th><th>Status</th><th>In use</th><th></th></tr></thead>
+      <thead><tr><th></th><th>Name</th><th>Sort</th><th>Homepage</th><th>Filter</th><th>Listings</th><th>Status</th><th></th></tr></thead>
       <tbody>
       <?php foreach ($rows as $row): ?>
         <?php
           $thumb = trim((string) ($row['image_path'] ?? ''));
           $thumbUrl = $thumb !== '' ? media_url($thumb) : '';
-          $usage = taxonomy_region_usage_count((int) $row['id']);
+          $usage = taxonomy_region_listing_count($row);
+          $filter = hougarden_region_search_filter($row);
+          $filterLabel = $filter === [] ? '—' : http_build_query($filter);
           $isActiveRow = !empty($row['is_active']);
         ?>
         <tr>
@@ -176,9 +183,10 @@ require dirname(__DIR__) . '/includes/admin-header.php';
           </td>
           <td><?= e((string) $row['name']) ?></td>
           <td><?= e((string) $row['sort_order']) ?></td>
-          <td><?= !empty($row['is_featured']) ? 'Featured' : '—' ?></td>
+          <td><?= !empty($row['is_featured']) ? 'Yes' : '—' ?></td>
+          <td><code style="font-size:0.75rem;"><?= e($filterLabel) ?></code></td>
+          <td><?= (int) $usage ?></td>
           <td><?= $isActiveRow ? 'Active' : 'Inactive' ?></td>
-          <td><?= e((string) $usage) ?></td>
           <td>
             <div class="admin-menu">
               <button type="button" class="admin-menu__toggle" aria-label="Actions" aria-haspopup="true">⋯</button>
@@ -225,7 +233,7 @@ require dirname(__DIR__) . '/includes/admin-header.php';
   <div class="admin-modal__backdrop" data-modal-close></div>
   <div class="admin-modal__dialog">
     <div class="admin-modal__head">
-      <h2 id="region-modal-title"><?= $editing ? 'Edit region' : 'Add region' ?></h2>
+      <h2 id="region-modal-title"><?= $editing ? 'Edit location' : 'Add location' ?></h2>
       <button type="button" class="admin-modal__close" data-modal-close aria-label="Close">&times;</button>
     </div>
     <form method="post" action="" enctype="multipart/form-data">
@@ -245,10 +253,30 @@ require dirname(__DIR__) . '/includes/admin-header.php';
       <div class="admin-field">
         <label for="sort_order">Display order</label>
         <input id="sort_order" name="sort_order" type="number" value="<?= e((string) ($editing['sort_order'] ?? '')) ?>" placeholder="auto on create">
-        <p class="admin-note">Lower numbers appear first on the Markets page and the homepage featured row.</p>
+        <p class="admin-note">Lower numbers appear first in the homepage Locations row.</p>
       </div>
       <div class="admin-field">
-        <label><input type="checkbox" name="is_featured" value="1" <?= !empty($editing['is_featured']) ? 'checked' : '' ?>> Featured on homepage (Exclusive Collections, top 3 by order)</label>
+        <label><input type="checkbox" name="is_featured" value="1" <?= !empty($editing['is_featured']) ? 'checked' : '' ?>> Show on homepage (Locations section)</label>
+      </div>
+      <div class="admin-grid-2">
+        <div class="admin-field">
+          <label for="home_filter_key">Search filter type</label>
+          <select id="home_filter_key" name="home_filter_key">
+            <?php
+              $fk = (string) ($editing['home_filter_key'] ?? 'location');
+              if ($fk === '' && !empty($editing['name']) && strcasecmp((string) $editing['name'], 'Victoria') === 0) {
+                  $fk = 'market';
+              }
+            ?>
+            <option value="location" <?= $fk === 'location' ? 'selected' : '' ?>>Suburb / location</option>
+            <option value="market" <?= $fk === 'market' ? 'selected' : '' ?>>Victoria market</option>
+          </select>
+        </div>
+        <div class="admin-field">
+          <label for="home_filter_value">Filter value</label>
+          <input id="home_filter_value" name="home_filter_value" value="<?= e((string) ($editing['home_filter_value'] ?? $editing['name'] ?? '')) ?>" placeholder="e.g. Rose Bay or victoria">
+          <p class="admin-note">Must match listing <strong>city</strong> (or <code>market=victoria</code> for Victoria).</p>
+        </div>
       </div>
       <div class="admin-field">
         <label for="image">Collection image</label>

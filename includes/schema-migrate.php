@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 function app_schema_target_version(): int
 {
-    return 6;
+    return 8;
 }
 
 function schema_table_exists(PDO $pdo, string $table): bool
@@ -107,7 +107,22 @@ function app_schema_migrations(): array
         4 => 'schema_migrate_v4_taxonomy_is_active',
         5 => 'schema_migrate_v5_property_image_caption',
         6 => 'schema_migrate_v6_default_settings_keys',
+        7 => 'schema_migrate_v7_hougarden_home_locations',
+        8 => 'schema_migrate_v8_purge_legacy_market_regions',
     ];
+}
+
+function schema_migrate_v8_purge_legacy_market_regions(PDO $pdo): void
+{
+    if (!schema_table_exists($pdo, 'regions')) {
+        return;
+    }
+    $legacySlugs = [
+        'aspen', 'vail', 'beaver-creek', 'telluride', 'snowmass', 'steamboat', 'denver-metro',
+        'phoenix-metro', 'austin-metro', 'central-florida', 'atlanta-metro',
+    ];
+    $placeholders = implode(',', array_fill(0, count($legacySlugs), '?'));
+    $pdo->prepare("DELETE FROM regions WHERE slug IN ($placeholders)")->execute($legacySlugs);
 }
 
 function schema_migrate_v1_home_feed_columns(PDO $pdo): void
@@ -155,6 +170,63 @@ function schema_migrate_v5_property_image_caption(PDO $pdo): void
         return;
     }
     schema_add_column($pdo, 'property_images', 'caption', 'VARCHAR(160) NULL DEFAULT NULL', 'alt_text');
+}
+
+function schema_migrate_v7_hougarden_home_locations(PDO $pdo): void
+{
+    if (!schema_table_exists($pdo, 'regions')) {
+        return;
+    }
+    schema_add_column($pdo, 'regions', 'home_filter_key', "VARCHAR(16) NULL DEFAULT NULL COMMENT 'location|market'", 'image_path');
+    schema_add_column($pdo, 'regions', 'home_filter_value', 'VARCHAR(120) NULL DEFAULT NULL', 'home_filter_key');
+
+    // Replace legacy Colorado market rows with HouGarden AU homepage locations.
+    $legacySlugs = [
+        'aspen', 'vail', 'beaver-creek', 'telluride', 'snowmass', 'steamboat', 'denver-metro',
+        'phoenix-metro', 'austin-metro', 'central-florida', 'atlanta-metro',
+    ];
+    $placeholders = implode(',', array_fill(0, count($legacySlugs), '?'));
+    $pdo->prepare("DELETE FROM regions WHERE slug IN ($placeholders)")->execute($legacySlugs);
+
+    $locations = [
+        ['bellevue-hill', 'Bellevue Hill', 10, 'location', 'Bellevue Hill', 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=800&q=80'],
+        ['rose-bay', 'Rose Bay', 20, 'location', 'Rose Bay', 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&fit=crop&w=800&q=80'],
+        ['south-yarra', 'South Yarra', 30, 'location', 'South Yarra', 'https://images.unsplash.com/photo-1514395462725-fb8496db94a8?auto=format&fit=crop&w=800&q=80'],
+        ['ocean-grove', 'Ocean Grove', 40, 'location', 'Ocean Grove', 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&q=80'],
+        ['victoria', 'Victoria', 50, 'market', 'victoria', 'https://images.unsplash.com/photo-1519864607624-a07bb8c2477e?auto=format&fit=crop&w=800&q=80'],
+    ];
+
+    $upsert = $pdo->prepare(
+        'INSERT INTO regions (slug, name, sort_order, is_active, is_featured, image_path, home_filter_key, home_filter_value)
+         VALUES (?, ?, ?, 1, 1, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+           name = VALUES(name),
+           sort_order = VALUES(sort_order),
+           is_active = 1,
+           is_featured = 1,
+           home_filter_key = VALUES(home_filter_key),
+           home_filter_value = VALUES(home_filter_value),
+           image_path = COALESCE(regions.image_path, VALUES(image_path))'
+    );
+    foreach ($locations as $loc) {
+        $upsert->execute([$loc[0], $loc[1], $loc[2], $loc[5], $loc[3], $loc[4]]);
+    }
+
+    if (schema_table_exists($pdo, 'property_types')) {
+        $pdo->exec("UPDATE property_types SET is_active = 0 WHERE slug IN ('estate','ranch','chalet')");
+        $typeUpsert = $pdo->prepare(
+            'INSERT INTO property_types (slug, name, sort_order, is_active) VALUES (?, ?, ?, 1)
+             ON DUPLICATE KEY UPDATE name = VALUES(name), is_active = 1'
+        );
+        foreach ([
+            ['single_family', 'House', 10],
+            ['condo', 'Apartment', 20],
+            ['townhouse', 'Townhouse', 30],
+            ['land', 'Land', 40],
+        ] as $t) {
+            $typeUpsert->execute([$t[0], $t[1], $t[2]]);
+        }
+    }
 }
 
 function schema_migrate_v6_default_settings_keys(PDO $pdo): void
