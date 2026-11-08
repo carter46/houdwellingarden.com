@@ -11,9 +11,65 @@ require_once __DIR__ . '/hougarden-shell.php';
 
 $activeNav = $activeNav ?? 'home';
 $sidebarItems = hougarden_sidebar_items();
+$topNavItems = hougarden_topnav_items();
 require __DIR__ . '/stitch-head.php';
 ?>
 <div class="hg-app" data-hg-suggest-url="<?= e(base_url('api/search-suggest.php')) ?>">
+  <header class="hg-site-header" role="banner">
+    <div class="hg-topnav hidden lg:flex" aria-label="Primary">
+      <nav class="hg-topnav__links hg-topnav__links--start" aria-label="Browse">
+        <?php foreach ($topNavItems as $item): ?>
+          <a class="hg-topnav__link" href="<?= e((string) $item['href']) ?>"><?= e((string) $item['label']) ?></a>
+        <?php endforeach; ?>
+      </nav>
+      <a class="hg-topnav__brand" href="<?= e(base_url('index.php')) ?>">
+        <span class="hg-topnav__brand-mark" aria-hidden="true"><?= e(substr(site_name_short(), 0, 1)) ?></span>
+        <span class="hg-topnav__brand-text"><?= e(site_name_short()) ?></span>
+      </a>
+      <div class="hg-topnav__end">
+        <a class="hg-topnav__link hg-topnav__link--quiet" href="<?= e(base_url('admin/login.php')) ?>">Sign in</a>
+        <a class="hg-topnav__cta" href="<?= e(base_url('properties.php')) ?>">Search homes</a>
+      </div>
+    </div>
+    <div class="hg-mobile-bar lg:hidden">
+      <a href="<?= e(base_url('index.php')) ?>" class="hg-mobile-bar__brand">
+        <span class="hg-mobile-bar__logo">h</span>
+        <?= e(site_name_short()) ?>
+      </a>
+      <input type="checkbox" id="hg-mobile-nav" class="sr-only" autocomplete="off"/>
+      <label for="hg-mobile-nav" class="hg-mobile-bar__menu" aria-label="Open menu"><?= hg_icon('menu', 'hg-icon--lg') ?></label>
+      <div class="hg-mobile-drawer">
+        <label for="hg-mobile-nav" class="hg-mobile-drawer__backdrop" aria-hidden="true"></label>
+        <div class="hg-mobile-drawer__panel">
+          <div class="hg-mobile-drawer__head">
+            <a href="<?= e(base_url('index.php')) ?>" class="hg-mobile-drawer__brand">
+              <span class="hg-mobile-bar__logo">h</span>
+              <?= e(site_name_short()) ?>
+            </a>
+            <label for="hg-mobile-nav" class="hg-mobile-drawer__close" aria-label="Close menu"><?= hg_icon('close') ?></label>
+          </div>
+          <div class="hg-mobile-drawer__scroll">
+            <p class="hg-mobile-drawer__section">Browse</p>
+            <?php foreach ($topNavItems as $item): ?>
+              <a class="hg-mobile-drawer__link" href="<?= e((string) $item['href']) ?>"><?= e((string) $item['label']) ?></a>
+            <?php endforeach; ?>
+            <p class="hg-mobile-drawer__section">Shortcuts</p>
+            <?php foreach ($sidebarItems as $item): ?>
+              <a class="hg-mobile-drawer__link" href="<?= e((string) $item['href']) ?>">
+                <?= hg_icon((string) ($item['icon'] ?? 'search')) ?>
+                <span><?= e((string) $item['label']) ?></span>
+              </a>
+            <?php endforeach; ?>
+          </div>
+          <div class="hg-mobile-drawer__footer">
+            <a class="hg-mobile-drawer__cta" href="<?= e(base_url('properties.php')) ?>">Search homes</a>
+            <a class="hg-mobile-drawer__cta hg-mobile-drawer__cta--ghost" href="<?= e(base_url('admin/login.php')) ?>">Sign in</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="hg-app__frame">
   <aside class="hg-sidebar" aria-label="Site menu">
     <div class="hg-sidebar__top">
       <a class="hg-sidebar__logo" href="<?= e(base_url('index.php')) ?>" aria-label="<?= e(site_name()) ?>">
@@ -30,7 +86,7 @@ require __DIR__ . '/stitch-head.php';
             $cls = 'hg-sidebar__link' . ($active ? ' is-active' : '');
           ?>
           <a class="<?= e($cls) ?>" href="<?= e((string) $item['href']) ?>"<?= $active ? ' aria-current="page"' : '' ?>>
-            <span class="material-symbols-outlined hg-sidebar__icon" aria-hidden="true"><?= e((string) $item['icon']) ?></span>
+            <?= hg_icon((string) $item['icon'], 'hg-sidebar__icon') ?>
             <span class="hg-sidebar__label"><?= e((string) $item['label']) ?></span>
           </a>
         <?php endforeach; ?>
@@ -39,34 +95,15 @@ require __DIR__ . '/stitch-head.php';
     <div class="hg-sidebar__bottom">
       <a class="hg-sidebar__link hg-sidebar__link--signin" href="<?= e(base_url('admin/login.php')) ?>">
         <span class="hg-sidebar__signin-avatar" aria-hidden="true">
-          <span class="material-symbols-outlined">person</span>
+          <?= hg_icon('person') ?>
         </span>
         <span class="hg-sidebar__label">Sign in</span>
       </a>
       <a class="hg-sidebar__pin" href="<?= e(base_url('properties.php')) ?>" aria-label="Browse properties">
-        <span class="material-symbols-outlined">location_on</span>
+        <?= hg_icon('location_on') ?>
       </a>
     </div>
   </aside>
 
   <div class="hg-main">
-    <header class="hg-mobile-bar lg:hidden">
-      <a href="<?= e(base_url('index.php')) ?>" class="hg-mobile-bar__brand">
-        <span class="hg-mobile-bar__logo">h</span>
-        <?= e(site_name_short()) ?>
-      </a>
-      <input type="checkbox" id="hg-mobile-nav" class="sr-only" autocomplete="off"/>
-      <label for="hg-mobile-nav" class="material-symbols-outlined hg-mobile-bar__menu" aria-label="Open menu">menu</label>
-      <div class="hg-mobile-drawer">
-        <label for="hg-mobile-nav" class="hg-mobile-drawer__backdrop" aria-hidden="true"></label>
-        <div class="hg-mobile-drawer__panel">
-          <a href="<?= e(base_url('index.php')) ?>" class="hg-mobile-drawer__link">Home</a>
-          <?php foreach ($sidebarItems as $item): ?>
-            <a href="<?= e((string) $item['href']) ?>" class="hg-mobile-drawer__link"><?= e((string) $item['label']) ?></a>
-          <?php endforeach; ?>
-          <a href="<?= e(base_url('properties.php')) ?>" class="hg-mobile-drawer__link">All properties</a>
-          <a href="<?= e(base_url('contact.php')) ?>" class="hg-mobile-drawer__link">Contact</a>
-        </div>
-      </div>
-    </header>
     <main class="hg-content">

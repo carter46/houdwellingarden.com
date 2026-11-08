@@ -9,4 +9,4 @@ Write-Host ""
 Write-Host "Open: http://127.0.0.1:$port/"
 Write-Host "Admin: http://127.0.0.1:$port/admin/login.php (create account via admin/setup.php if needed)"
 Write-Host ""
-php -S "127.0.0.1:$port" router.php
+php -S "127.0.0.1:$port" -t . router.php

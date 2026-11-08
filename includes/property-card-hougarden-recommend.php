@@ -15,7 +15,7 @@ $cover = (string) ($property['cover_path'] ?? $property['image_path'] ?? '');
 $priceLabel = format_price(
     isset($property['price']) ? (float) $property['price'] : null,
     !empty($property['price_on_request']),
-    (string) ($property['currency'] ?? 'AUD')
+    (string) ($property['currency'] ?? 'USD')
 );
 $title = trim((string) ($property['title'] ?? ''));
 $address = trim((string) ($property['address_line'] ?? ''));
@@ -67,7 +67,7 @@ $imageCount = (int) ($property['image_count'] ?? 0);
       <?php endif; ?>
       <?php if ($imageCount > 0): ?>
         <div class="hg-rec-card__photo-count" aria-hidden="true">
-          <span class="material-symbols-outlined">photo_camera</span>
+          <?= hg_icon('photo_camera') ?>
           <span><?= e((string) $imageCount) ?></span>
         </div>
       <?php endif; ?>

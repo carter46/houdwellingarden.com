@@ -34,12 +34,12 @@ $items = [
         <?php foreach ($items as $key => $item): ?>
             <a class="admin-sidebar__link<?= $adminActiveNav === $key ? ' is-active' : '' ?>"
                href="<?= e(base_url($item['href'])) ?>">
-                <span class="material-symbols-outlined" aria-hidden="true"><?= e($item['icon']) ?></span>
+                <?= hg_icon((string) $item['icon']) ?>
                 <span><?= e($item['label']) ?></span>
             </a>
         <?php endforeach; ?>
         <a class="admin-sidebar__link admin-sidebar__link--exit" href="<?= e(base_url('index.php')) ?>">
-            <span class="material-symbols-outlined" aria-hidden="true">public</span>
+            <?= hg_icon('public') ?>
             <span>View site</span>
         </a>
     </nav>

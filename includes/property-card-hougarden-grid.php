@@ -15,7 +15,7 @@ $cover = (string) ($property['cover_path'] ?? $property['image_path'] ?? '');
 $priceLabel = format_price(
     isset($property['price']) ? (float) $property['price'] : null,
     !empty($property['price_on_request']),
-    (string) ($property['currency'] ?? 'AUD')
+    (string) ($property['currency'] ?? 'USD')
 );
 $title = trim((string) ($property['title'] ?? ''));
 $city = trim((string) ($property['city'] ?? ''));

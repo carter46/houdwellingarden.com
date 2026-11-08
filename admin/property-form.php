@@ -40,13 +40,13 @@ $defaults = [
     'status' => 'draft',
     'price' => '',
     'price_on_request' => 0,
-    'currency' => 'AUD',
+    'currency' => 'USD',
     'address_line' => '',
     'city' => '',
     'region' => '',
-    'state' => 'NSW',
+    'state' => '',
     'postal_code' => '',
-    'country' => 'Australia',
+    'country' => 'United States',
     'bedrooms' => '',
     'bathrooms' => '',
     'sqft' => '',
@@ -358,7 +358,7 @@ $canViewPublic = $isEdit && $viewSlug !== '' && is_property_status_public((strin
             <div class="admin-field">
                 <label for="sqft">Floor area</label>
                 <input id="sqft" name="sqft" type="text" value="<?= e((string) $form['sqft']) ?>" placeholder="e.g. 180 m² or 1940 ft²">
-                <p class="admin-note">Stored in the <code>sqft</code> column. For AU listings, enter square metres or square feet — the public site converts to m² when currency is AUD.</p>
+                <p class="admin-note">Stored in the <code>sqft</code> column. US listings display square feet on the public site (m² when currency is AUD).</p>
             </div>
             <div class="admin-field"><label for="lot_acres">Lot Size (Acres)</label><input id="lot_acres" name="lot_acres" type="text" value="<?= e((string) $form['lot_acres']) ?>"></div>
             <div class="admin-field"><label for="year_built">Year Built</label><input id="year_built" name="year_built" type="text" value="<?= e((string) $form['year_built']) ?>" placeholder="YYYY"></div>

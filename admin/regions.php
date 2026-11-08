@@ -144,7 +144,11 @@ require dirname(__DIR__) . '/includes/admin-header.php';
   <div>
     <span class="admin-eyebrow">Site</span>
     <h1 class="admin-page-title">Regions</h1>
-    <p class="admin-page-lead">Areas shown on the homepage and Markets page. Use <strong>Show on homepage</strong> for location tiles.</p>
+    <p class="admin-page-lead">
+      Each <strong>location</strong> can drive a homepage tile and a Markets card.
+      Upload a <strong>collection image</strong> when editing a region — that photo is what visitors see under “Explore areas” (not a listing photo).
+      Match <strong>Filter value</strong> to listing <strong>city</strong> (e.g. <code>Austin</code>).
+    </p>
   </div>
   <div class="admin-actions" style="gap:0.5rem;">
     <a class="admin-btn admin-btn--ghost" href="<?= e(base_url('markets.php')) ?>" target="_blank" rel="noopener">View Markets</a>
@@ -211,7 +215,7 @@ require dirname(__DIR__) . '/includes/admin-header.php';
           <strong><?= e((string) $row['name']) ?></strong>
           <span class="admin-muted"><?= $isActiveRow ? 'Active' : 'Inactive' ?> · <?= (int) $usage ?> listings</span>
         </span>
-        <span class="material-symbols-outlined admin-accordion-card__chevron" aria-hidden="true">expand_more</span>
+        <?= hg_icon('expand_more', 'admin-accordion-card__chevron') ?>
       </button>
       <div class="admin-accordion-card__body" id="<?= e($cardId) ?>" hidden>
         <div class="admin-accordion-card__details">
@@ -267,18 +271,18 @@ require dirname(__DIR__) . '/includes/admin-header.php';
                   $fk = 'market';
               }
             ?>
-            <option value="location" <?= $fk === 'location' ? 'selected' : '' ?>>Suburb / location</option>
-            <option value="market" <?= $fk === 'market' ? 'selected' : '' ?>>Victoria market</option>
+            <option value="location" <?= $fk === 'location' ? 'selected' : '' ?>>City / location</option>
+            <option value="market" <?= $fk === 'market' ? 'selected' : '' ?>>Market (advanced)</option>
           </select>
         </div>
         <div class="admin-field">
           <label for="home_filter_value">Filter value</label>
-          <input id="home_filter_value" name="home_filter_value" value="<?= e((string) ($editing['home_filter_value'] ?? $editing['name'] ?? '')) ?>" placeholder="e.g. Rose Bay or victoria">
-          <p class="admin-note">Must match listing <strong>city</strong> (or <code>market=victoria</code> for Victoria).</p>
+          <input id="home_filter_value" name="home_filter_value" value="<?= e((string) ($editing['home_filter_value'] ?? $editing['name'] ?? '')) ?>" placeholder="e.g. Austin">
+          <p class="admin-note">Must match listing <strong>city</strong> (e.g. <code>Austin</code> for the Austin homepage card).</p>
         </div>
       </div>
       <div class="admin-field">
-        <label for="image">Collection image</label>
+        <label for="image">Homepage location image *</label>
         <?php
           $editImg = trim((string) ($editing['image_path'] ?? ''));
           if ($editImg !== ''):
@@ -287,7 +291,7 @@ require dirname(__DIR__) . '/includes/admin-header.php';
           <label><input type="checkbox" name="clear_image" value="1"> Remove current image</label>
         <?php endif; ?>
         <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp">
-        <p class="admin-note">JPEG, PNG, or WebP. Recommended wide landscape photo.</p>
+        <p class="admin-note"><strong>Shown on the homepage “Explore areas” row.</strong> JPEG, PNG, or WebP; wide landscape (≈ 3:2). If empty, a generic fallback is used until you upload one.</p>
       </div>
       <div class="admin-field">
         <label><input type="checkbox" name="is_active" value="1" <?= !isset($editing['is_active']) || !empty($editing['is_active']) ? 'checked' : '' ?><?= empty($editing['id']) ? ' disabled' : '' ?>> Active (shown on Markets page and in listing filters)</label>

@@ -246,6 +246,61 @@ function property_agents_all(): array
     return db()->query('SELECT id, name, title, region FROM agents WHERE is_active = 1 ORDER BY sort_order, name')->fetchAll() ?: [];
 }
 
+function agent_find_active(int $id): ?array
+{
+    if ($id <= 0) {
+        return null;
+    }
+    $stmt = db()->prepare('SELECT * FROM agents WHERE id = ? AND is_active = 1 LIMIT 1');
+    $stmt->execute([$id]);
+    $row = $stmt->fetch();
+
+    return is_array($row) ? $row : null;
+}
+
+/**
+ * When a listing has no assigned agent, apply Admin → Settings default (or first active agent)
+ * so the detail sidebar still shows a consistent contact card.
+ *
+ * @param array<string, mixed> $property
+ * @return array<string, mixed>
+ */
+function property_enrich_listing_agent(array $property): array
+{
+    if (trim((string) ($property['agent_name'] ?? '')) !== '') {
+        return $property;
+    }
+
+    $agent = null;
+    $defaultId = (int) (setting_get('default_agent_id') ?? 0);
+    if ($defaultId > 0) {
+        $agent = agent_find_active($defaultId);
+    }
+    if ($agent === null) {
+        $list = agents_list_public();
+        $agent = $list[0] ?? null;
+    }
+    if ($agent === null) {
+        return $property;
+    }
+
+    $property['agent_id'] = (int) ($agent['id'] ?? 0);
+    $property['agent_name'] = (string) ($agent['name'] ?? '');
+    $property['agent_title'] = (string) ($agent['title'] ?? '');
+    $property['agent_region'] = (string) ($agent['region'] ?? '');
+    $property['agent_photo'] = (string) ($agent['photo_path'] ?? '');
+    $property['agent_slug'] = (string) ($agent['slug'] ?? '');
+    $property['agent_badge'] = (string) ($agent['badge'] ?? '');
+    if (trim((string) ($property['agent_quote'] ?? '')) === '' && !empty($agent['bio'])) {
+        $bio = trim((string) $agent['bio']);
+        if ($bio !== '') {
+            $property['agent_quote'] = mb_strlen($bio) > 160 ? mb_substr($bio, 0, 157) . '…' : $bio;
+        }
+    }
+
+    return $property;
+}
+
 /**
  * @return list<array<string, mixed>>
  */
@@ -447,18 +502,18 @@ function property_validate_input(array $input, ?int $excludeId = null): array
     $existing = $excludeId ? property_find($excludeId) : null;
     $currency = strtoupper(trim((string) ($input['currency'] ?? '')));
     if (!preg_match('/^[A-Z]{3}$/', $currency)) {
-        $currency = strtoupper(trim((string) ($existing['currency'] ?? 'AUD')));
+        $currency = strtoupper(trim((string) ($existing['currency'] ?? 'USD')));
         if (!preg_match('/^[A-Z]{3}$/', $currency)) {
-            $currency = 'AUD';
+            $currency = 'USD';
         }
     }
     $country = trim((string) ($input['country'] ?? ''));
     if ($country === '') {
-        $country = trim((string) ($existing['country'] ?? 'Australia')) ?: 'Australia';
+        $country = trim((string) ($existing['country'] ?? 'United States')) ?: 'United States';
     }
     $state = trim((string) ($input['state'] ?? ''));
     if ($state === '') {
-        $state = trim((string) ($existing['state'] ?? 'NSW')) ?: 'NSW';
+        $state = trim((string) ($existing['state'] ?? ''));
     }
 
     $amenityIds = [];
@@ -947,8 +1002,9 @@ function property_public_where_sql(array $filters = []): array
     }
 
     $market = trim((string) ($filters['market'] ?? ''));
-    if ($market === 'victoria') {
-        $where[] = "p.state = 'VIC' AND p.city NOT IN ('South Yarra', 'Ocean Grove')";
+    if ($market !== '') {
+        $where[] = 'p.city = ?';
+        $params[] = $market;
     }
 
     return [implode(' AND ', $where), $params];

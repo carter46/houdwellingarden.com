@@ -5,19 +5,33 @@
 declare(strict_types=1);
 
 $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-$file = __DIR__ . $uri;
+$uri = '/' . trim($uri, '/');
+if ($uri === '//') {
+    $uri = '/';
+}
 
-if ($uri !== '/' && is_file($file)) {
+$rel = ltrim($uri, '/');
+$relPath = $rel !== '' ? str_replace('/', DIRECTORY_SEPARATOR, $rel) : '';
+$file = $relPath !== '' ? (__DIR__ . DIRECTORY_SEPARATOR . $relPath) : __DIR__;
+
+// Static assets (css, js, images, uploads) — let the built-in server stream the file.
+if ($relPath !== '' && is_file($file) && !preg_match('/\.php$/i', $relPath)) {
     return false;
 }
 
-if ($uri === '/' || $uri === '') {
+if ($uri === '/') {
     require __DIR__ . '/index.php';
     return true;
 }
 
-if (is_file(__DIR__ . $uri . '.php')) {
-    require __DIR__ . $uri . '.php';
+if (is_file($file) && preg_match('/\.php$/i', $relPath)) {
+    require $file;
+    return true;
+}
+
+$phpFile = __DIR__ . DIRECTORY_SEPARATOR . $relPath . '.php';
+if ($relPath !== '' && is_file($phpFile)) {
+    require $phpFile;
     return true;
 }
 

@@ -1,16 +1,23 @@
 <?php
 /**
- * Re-label existing properties in place from database/hougarden_au_manifest.json.
+ * Re-label existing properties in place from a HouGarden manifest JSON.
  * Does not delete rows — updates the first N properties by id.
  *
  * Usage: php scripts/apply-hougarden-manifest.php
+ * Optional: set HOUGARDEN_MANIFEST=/path/to/manifest.json (defaults to hougarden_us_manifest.json)
  */
 
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
+require_once __DIR__ . '/lib-http-fetch.php';
 
-$manifestPath = dirname(__DIR__) . '/database/hougarden_au_manifest.json';
+$manifestPath = getenv('HOUGARDEN_MANIFEST') ?: '';
+if ($manifestPath === '') {
+    $manifestPath = dirname(__DIR__) . '/database/hougarden_us_manifest.json';
+} elseif (!str_starts_with($manifestPath, '/') && !preg_match('#^[A-Za-z]:\\\\#', $manifestPath)) {
+    $manifestPath = dirname(__DIR__) . '/' . ltrim($manifestPath, '/');
+}
 if (!is_readable($manifestPath)) {
     fwrite(STDERR, "Missing manifest: {$manifestPath}\n");
     exit(1);
@@ -55,8 +62,11 @@ function hg_download_image(string $url, string $destPath): bool
         ],
         'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
     ]);
-    $bin = @file_get_contents($url, false, $ctx);
-    if ($bin === false || strlen($bin) < 500) {
+    $bin = http_fetch_binary($url);
+    if ($bin === null) {
+        $bin = @file_get_contents($url, false, $ctx);
+    }
+    if (!is_string($bin) || strlen($bin) < 500) {
         return false;
     }
     $ext = 'jpg';
@@ -126,12 +136,15 @@ foreach ($listings as $i => $row) {
     $isApartment = is_numeric($beds) && (float) $beds <= 2.5 && str_contains(strtolower($address), '/');
     $propTypeId = $isApartment ? $condoTypeId : $typeId;
 
+    $defaultDesc =
+        'Demo placeholder for website presentation only—not a real MLS listing. '
+        . 'Replace with licensed inventory before launch.';
     $desc = trim((string) ($row['description'] ?? ''));
     if ($desc === '') {
-        $desc = null;
+        $desc = $defaultDesc;
     }
 
-    $reference = 'HG-AU-' . str_pad((string) ($i + 1), 3, '0', STR_PAD_LEFT);
+    $reference = 'HG-US-' . str_pad((string) ($i + 1), 3, '0', STR_PAD_LEFT);
 
     $common = [
         $newSlug,
@@ -140,32 +153,28 @@ foreach ($listings as $i => $row) {
         $propTypeId,
         'available',
         $row['price'] ?? null,
-        'AUD',
+        'USD',
         $address,
         $city,
         (string) ($row['region'] ?? $city),
         (string) ($row['state'] ?? ''),
         (string) ($row['postal_code'] ?? ''),
-        'Australia',
+        'United States',
         $row['bedrooms'] ?? null,
         $row['bathrooms'] ?? null,
         $row['sqft'] ?? null,
         $row['badge'] ?? null,
         !empty($row['is_featured']) ? 1 : 0,
-        'hougarden_au',
+        'hougarden_us_placeholder',
         (string) ($row['source_url'] ?? ''),
         $reference,
         $propertyId,
     ];
 
-    if ($desc !== null) {
-        $updateWithDesc->execute(array_merge(
-            [$common[0], $common[1], $common[2], $desc],
-            array_slice($common, 3)
-        ));
-    } else {
-        $updateNoDesc->execute($common);
-    }
+    $updateWithDesc->execute(array_merge(
+        [$common[0], $common[1], $common[2], $desc],
+        array_slice($common, 3)
+    ));
 
     $folder = $uploadRoot . '/hg-' . $propertyId;
     $relPath = 'uploads/properties/hg-' . $propertyId . '/cover.jpg';
@@ -219,17 +228,17 @@ foreach ($listings as $i => $row) {
     $applied++;
 }
 
-// Remaining properties: mark as Australia backup listings with same country/currency
 $remaining = array_slice($ids, count($listings));
-foreach ($remaining as $j => $r) {
+foreach ($remaining as $r) {
     $pid = (int) $r['id'];
     $pdo->prepare(
-        "UPDATE properties SET country = 'Australia', currency = 'AUD', status = 'available',
-         source_name = COALESCE(source_name, 'hougarden_au_extra')
+        "UPDATE properties SET country = 'United States', currency = 'USD', status = 'available',
+         source_name = COALESCE(source_name, 'hougarden_us_placeholder_extra')
          WHERE id = ?"
     )->execute([$pid]);
 }
 
 echo "Updated {$applied} properties from manifest.\n";
+echo "Manifest: {$manifestPath}\n";
 echo "Images downloaded: {$imagesOk}, kept/failed: {$imagesFail}\n";
-echo "Extra properties left in DB: " . count($remaining) . " (unchanged titles, AUD country set)\n";
+echo "Extra properties left in DB: " . count($remaining) . " (USD / US country set)\n";

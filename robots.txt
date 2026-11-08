@@ -4,6 +4,7 @@ Disallow: /storage/
 Disallow: /database/
 Disallow: /vendor/
 Disallow: /bin/
+Disallow: /config.php
 Disallow: /config.local.php
 Disallow: /health.php
 Allow: /

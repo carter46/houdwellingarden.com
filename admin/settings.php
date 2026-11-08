@@ -109,12 +109,22 @@ if (is_post()) {
             $aboutHeroTitle = trim((string) ($_POST['about_hero_title'] ?? ''));
             $aboutHeroLead = trim((string) ($_POST['about_hero_lead'] ?? ''));
             $aboutStatsJson = trim((string) ($_POST['about_stats_json'] ?? ''));
+            $aboutPillarsJson = trim((string) ($_POST['about_pillars_json'] ?? ''));
+            $aboutCtaTitle = trim((string) ($_POST['about_cta_title'] ?? ''));
+            $aboutCtaBody = trim((string) ($_POST['about_cta_body'] ?? ''));
+            $defaultAgentId = max(0, (int) ($_POST['default_agent_id'] ?? 0));
             $faqJson = trim((string) ($_POST['faq_json'] ?? ''));
 
             if ($aboutStatsJson !== '') {
                 $decodedStats = json_decode($aboutStatsJson, true);
                 if (!is_array($decodedStats)) {
                     $errors[] = 'About stats must be valid JSON (array of {value, label}).';
+                }
+            }
+            if ($aboutPillarsJson !== '') {
+                $decodedPillars = json_decode($aboutPillarsJson, true);
+                if (!is_array($decodedPillars)) {
+                    $errors[] = 'About pillars must be valid JSON (array of {title, body, icon}).';
                 }
             }
             if ($faqJson !== '') {
@@ -140,6 +150,10 @@ if (is_post()) {
                 setting_set('about_hero_title', $aboutHeroTitle !== '' ? $aboutHeroTitle : null);
                 setting_set('about_hero_lead', $aboutHeroLead !== '' ? $aboutHeroLead : null);
                 setting_set('about_stats_json', $aboutStatsJson !== '' ? $aboutStatsJson : null);
+                setting_set('about_pillars_json', $aboutPillarsJson !== '' ? $aboutPillarsJson : null);
+                setting_set('about_cta_title', $aboutCtaTitle !== '' ? $aboutCtaTitle : null);
+                setting_set('about_cta_body', $aboutCtaBody !== '' ? $aboutCtaBody : null);
+                setting_set('default_agent_id', $defaultAgentId > 0 ? (string) $defaultAgentId : null);
                 setting_set('faq_json', $faqJson !== '' ? $faqJson : null);
 
                 if (!empty($_FILES['logo']['name'])) {
@@ -220,6 +234,19 @@ require dirname(__DIR__) . '/includes/admin-header.php';
     <label><input type="checkbox" name="property_show_inquiry" value="1" <?= property_page_show_inquiry_form() ? 'checked' : '' ?>> Show property enquiry form</label>
     <p class="admin-note">When hidden, Enquire buttons link to the Contact page instead.</p>
   </div>
+  <?php $settingsAgents = property_agents_all(); ?>
+  <div class="admin-field">
+    <label for="default_agent_id">Default listing agent</label>
+    <select id="default_agent_id" name="default_agent_id">
+      <option value="0">First active agent in database</option>
+      <?php foreach ($settingsAgents as $agentRow): ?>
+        <option value="<?= (int) $agentRow['id'] ?>" <?= (int) (setting_get('default_agent_id') ?? 0) === (int) $agentRow['id'] ? 'selected' : '' ?>>
+          <?= e((string) $agentRow['name']) ?><?= !empty($agentRow['region']) ? ' — ' . e((string) $agentRow['region']) : '' ?>
+        </option>
+      <?php endforeach; ?>
+    </select>
+    <p class="admin-note">Used on the property page when a listing has no agent assigned (agent card + enquiry intro). Per-listing agent is still set in Admin → Properties.</p>
+  </div>
 
   <h2 style="margin:1.5rem 0 0.75rem;font-size:1.1rem;">Smartsupp live chat</h2>
   <div class="admin-field">
@@ -252,6 +279,19 @@ require dirname(__DIR__) . '/includes/admin-header.php';
     <label for="about_stats_json">Stats (JSON)</label>
     <textarea id="about_stats_json" name="about_stats_json" rows="4" placeholder='[{"value":"20+","label":"Live listings"}]'><?= e((string) (setting_get('about_stats_json') ?? '')) ?></textarea>
     <p class="admin-note">Optional. Leave blank to auto-use live listing count and default labels.</p>
+  </div>
+  <div class="admin-field">
+    <label for="about_pillars_json">Value pillars (JSON)</label>
+    <textarea id="about_pillars_json" name="about_pillars_json" rows="6" placeholder='[{"title":"Search-first discovery","body":"…","icon":"search"}]'><?= e((string) (setting_get('about_pillars_json') ?? '')) ?></textarea>
+    <p class="admin-note">Icons: search, location_on, mail, chat, info, person, etc. (see site SVG icon set).</p>
+  </div>
+  <div class="admin-field">
+    <label for="about_cta_title">Bottom CTA title</label>
+    <input id="about_cta_title" name="about_cta_title" maxlength="191" value="<?= e((string) (setting_get('about_cta_title') ?? '')) ?>">
+  </div>
+  <div class="admin-field">
+    <label for="about_cta_body">Bottom CTA text</label>
+    <textarea id="about_cta_body" name="about_cta_body" rows="2"><?= e((string) (setting_get('about_cta_body') ?? '')) ?></textarea>
   </div>
 
   <h2 style="margin:1.5rem 0 0.75rem;font-size:1.1rem;">FAQ page content</h2>

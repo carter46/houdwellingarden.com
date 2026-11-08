@@ -1,4 +1,4 @@
--- HouGarden AU taxonomy seed (import after schema.sql or use hougarden-deploy.sql).
+-- HouGarden US demo taxonomy seed (import after schema.sql or use hougarden-deploy.sql).
 -- Homepage Locations = regions with is_featured = 1 (edit in Admin → Homepage locations).
 
 SET FOREIGN_KEY_CHECKS = 0;
@@ -21,11 +21,11 @@ INSERT INTO `property_types` (`slug`, `name`, `sort_order`, `is_active`) VALUES
   ('land', 'Land', 40, 1);
 
 INSERT INTO `regions` (`slug`, `name`, `sort_order`, `is_active`, `is_featured`, `image_path`, `home_filter_key`, `home_filter_value`) VALUES
-  ('bellevue-hill', 'Bellevue Hill', 10, 1, 1, NULL, 'location', 'Bellevue Hill'),
-  ('rose-bay', 'Rose Bay', 20, 1, 1, NULL, 'location', 'Rose Bay'),
-  ('south-yarra', 'South Yarra', 30, 1, 1, NULL, 'location', 'South Yarra'),
-  ('ocean-grove', 'Ocean Grove', 40, 1, 1, NULL, 'location', 'Ocean Grove'),
-  ('victoria', 'Victoria', 50, 1, 1, NULL, 'market', 'victoria');
+  ('austin-metro', 'Austin', 10, 1, 1, NULL, 'location', 'Austin'),
+  ('phoenix-metro', 'Phoenix', 20, 1, 1, NULL, 'location', 'Phoenix'),
+  ('atlanta-metro', 'Atlanta', 30, 1, 1, NULL, 'location', 'Atlanta'),
+  ('denver-metro', 'Denver', 40, 1, 1, NULL, 'location', 'Denver'),
+  ('chicago-metro', 'Chicago', 50, 1, 1, NULL, 'location', 'Chicago');
 
 INSERT INTO `amenities` (`slug`, `name`, `category`, `sort_order`, `is_active`) VALUES
   ('pool', 'Swimming pool', 'exterior', 10, 1),

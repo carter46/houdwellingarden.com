@@ -69,6 +69,7 @@ if (!class_exists(\PHPMailer\PHPMailer\PHPMailer::class)) {
 }
 
 require_once APP_ROOT . '/includes/helpers.php';
+require_once APP_ROOT . '/includes/hg-icons.php';
 require_once APP_ROOT . '/includes/security_headers.php';
 require_once APP_ROOT . '/includes/db.php';
 require_once APP_ROOT . '/includes/settings.php';

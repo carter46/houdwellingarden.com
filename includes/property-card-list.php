@@ -44,7 +44,7 @@ $badgeClass = (stripos($badge, 'just') !== false)
     <span class="absolute top-4 left-4 <?= e($badgeClass) ?> font-label-sm text-label-sm uppercase tracking-widest px-3 py-1"><?= e($badge) ?></span>
   <?php endif; ?>
   <button type="button" disabled class="absolute top-4 right-4 w-9 h-9 bg-surface/90 flex items-center justify-center text-primary border border-outline-variant/40" aria-label="Save property">
-    <span class="material-symbols-outlined text-[18px]">favorite</span>
+    <?= hg_icon('favorite', '', ['style' => 'width:18px;height:18px']) ?>
   </button>
   <div class="p-5">
     <p class="font-display-lg text-[22px] text-on-surface mb-1"><?= e($priceLabel) ?></p>

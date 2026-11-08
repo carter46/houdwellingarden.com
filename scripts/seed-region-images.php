@@ -8,11 +8,11 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 $map = [
-    'bellevue-hill' => 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=800&q=80',
-    'rose-bay' => 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&fit=crop&w=800&q=80',
-    'south-yarra' => 'https://images.unsplash.com/photo-1514395462725-fb8496db94a8?auto=format&fit=crop&w=800&q=80',
-    'ocean-grove' => 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&q=80',
-    'victoria' => 'https://images.unsplash.com/photo-1519864607624-a07bb8c2477e?auto=format&fit=crop&w=800&q=80',
+    'austin-metro' => 'https://images.unsplash.com/photo-1531218150217-54595bc27324?auto=format&fit=crop&w=800&q=80',
+    'phoenix-metro' => 'https://images.unsplash.com/photo-1516734215434-ccad973a74fe?auto=format&fit=crop&w=800&q=80',
+    'atlanta-metro' => 'https://images.unsplash.com/photo-1467226632440-45d075e5c8fe?auto=format&fit=crop&w=800&q=80',
+    'denver-metro' => 'https://images.unsplash.com/photo-1612892487469-05827b57269b?auto=format&fit=crop&w=800&q=80',
+    'chicago-metro' => 'https://images.unsplash.com/photo-1494522855154-9297ac83324f?auto=format&fit=crop&w=800&q=80',
 ];
 
 $dir = APP_ROOT . '/uploads/regions';

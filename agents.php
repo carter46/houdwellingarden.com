@@ -78,11 +78,11 @@ require __DIR__ . '/includes/header-hougarden.php';
           <div class="flex gap-6">
             <a class="group/link inline-flex items-center gap-1 no-underline" href="<?= e(base_url('contact.php')) ?>">
               <span class="font-label-sm text-label-sm text-on-surface transition-colors group-hover/link:text-primary">Contact</span>
-              <span class="material-symbols-outlined text-[16px] text-primary">arrow_forward</span>
+              <?= hg_icon('arrow_forward', 'text-primary', ['style' => 'width:16px;height:16px']) ?>
             </a>
             <a class="group/link inline-flex items-center gap-1 no-underline" href="<?= e(base_url('properties.php?agent_id=' . (int) ($agent['id'] ?? 0))) ?>">
               <span class="font-label-sm text-label-sm text-on-surface transition-colors group-hover/link:text-primary">View Listings</span>
-              <span class="material-symbols-outlined text-[16px] text-primary">arrow_forward</span>
+              <?= hg_icon('arrow_forward', 'text-primary', ['style' => 'width:16px;height:16px']) ?>
             </a>
           </div>
         </article>

@@ -57,11 +57,11 @@ try {
 
 $locationFilter = trim($filters['location']);
 $marketFilter = trim($filters['market']);
-if ($marketFilter === 'victoria') {
-    $pageTitle = 'Victoria — ' . site_name();
-    $listHeading = 'Properties in Victoria';
-    $listSub = 'Melbourne and regional Victoria (excluding South Yarra and Ocean Grove collections).';
-    $eyebrow = 'Victoria';
+if ($marketFilter !== '') {
+    $pageTitle = $marketFilter . ' — ' . site_name();
+    $listHeading = 'Properties in ' . $marketFilter;
+    $listSub = 'Browse every listing we have in ' . $marketFilter . '.';
+    $eyebrow = $marketFilter;
 } elseif ($locationFilter !== '') {
     $pageTitle = $locationFilter . ' — ' . site_name();
     $listHeading = 'Properties in ' . $locationFilter;
@@ -178,5 +178,5 @@ require __DIR__ . '/includes/header-hougarden.php';
     <?php endif; ?>
   <?php endif; ?>
 </div>
-<script src="<?= e(base_url('assets/js/hg-search-autocomplete.js')) ?>?v=1" defer></script>
+<script src="<?= e(base_url('assets/js/hg-search-autocomplete.js')) ?>?v=2" defer></script>
 <?php require __DIR__ . '/includes/footer-hougarden.php';

@@ -1,0 +1,73 @@
+<?php
+/**
+ * Base app config — REQUIRED on every environment (local + server).
+ *
+ * Setup:
+ *   1. Copy this file to config.php (gitignored — never commit config.php).
+ *   2. Optionally copy config.local.production.php.example → config.local.php for secrets/overrides.
+ *
+ * Bootstrap always loads config.php. When config.local.php exists, its values override this file.
+ */
+
+declare(strict_types=1);
+
+$config = [
+    'app' => [
+        'env' => 'production',
+        'debug' => false,
+        'url' => 'https://www.example.com',
+        'name' => 'HouGarden',
+        'timezone' => 'America/Chicago',
+    ],
+
+    'db' => [
+        'host' => '127.0.0.1',
+        'port' => 3306,
+        'name' => 'real_estate',
+        'user' => 'root',
+        'pass' => '',
+        'charset' => 'utf8mb4',
+    ],
+
+    'mail' => [
+        'driver' => 'log',
+        'from_email' => 'noreply@example.com',
+        'from_name' => 'HouGarden',
+        'admin_notify_email' => 'admin@example.com',
+        'brevo_api_key' => '',
+        'smtp_host' => '',
+        'smtp_port' => 587,
+        'smtp_encryption' => 'tls',
+        'smtp_user' => '',
+        'smtp_pass' => '',
+    ],
+
+    'security' => [
+        'cookie_secure' => null,
+        'trust_forwarded_proto' => false,
+        'health_token' => '',
+        'login_max_attempts' => 5,
+        'login_lockout_seconds' => 900,
+        'inquiry_max_per_hour' => 5,
+    ],
+
+    'smartsupp' => [
+        'key' => '',
+    ],
+
+    'admin' => [
+        'setup_enabled' => false,
+        'password_reset_enabled' => false,
+    ],
+];
+
+$localPath = __DIR__ . '/config.local.php';
+if (is_readable($localPath)) {
+  /** @var array<string, mixed> $overrides */
+    $overrides = require $localPath;
+    if (is_array($overrides)) {
+        $config = array_replace_recursive($config, $overrides);
+    }
+}
+
+return $config;

@@ -9,7 +9,7 @@ require_once __DIR__ . '/includes/bootstrap.php';
 require_once __DIR__ . '/includes/hougarden-shell.php';
 require_once __DIR__ . '/includes/hougarden-locations.php';
 
-$pageTitle = site_name() . ' — Australian property';
+$pageTitle = site_name() . ' — US homes for sale';
 hougarden_use_public_shell('home', 'hougarden-home');
 
 $feed = (string) ($_GET['feed'] ?? 'recommend');
@@ -49,12 +49,21 @@ try {
     error_log('[SDC] home: ' . $e->getMessage());
 }
 
-$heroImage = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=80';
-if ($locationCategories !== []) {
-    $heroImage = (string) ($locationCategories[0]['image'] ?? $heroImage);
+$heroImage = '';
+if (is_file(APP_ROOT . '/assets/img/hero-home.jpg')) {
+    $heroImage = media_url('assets/img/hero-home.jpg');
+} elseif (is_file(APP_ROOT . '/assets/img/regions/austin-metro.jpg')) {
+    $heroImage = media_url('assets/img/regions/austin-metro.jpg');
+}
+if ($locationCategories !== [] && $heroImage === '') {
+    $heroImage = (string) ($locationCategories[0]['image'] ?? '');
+}
+if ($heroImage === '' && is_file(APP_ROOT . '/assets/img/regions/austin-metro.jpg')) {
+    $heroImage = media_url('assets/img/regions/austin-metro.jpg');
 }
 
 $searchDefaultTab = 'location';
+$searchSimpleHome = true;
 $feedLabels = [
     'recommend' => 'Recommend',
     'watched' => 'Just watched',
@@ -69,8 +78,9 @@ require __DIR__ . '/includes/header-hougarden.php';
     <div class="hg-hero__scrim hg-hero__scrim--visual" aria-hidden="true"></div>
   </div>
   <div class="hg-hero__body">
-    <h1 class="hg-hero__title">Search the way you talk</h1>
-    <div class="hg-search-shell">
+    <h1 class="hg-hero__title">Agents. Homes. Loans.</h1>
+    <p class="hg-hero__tagline">Search cities and neighborhoods across the United States.</p>
+    <div class="hg-search-shell hg-search-shell--hero">
       <?php
       $searchAction = base_url('properties.php');
       require __DIR__ . '/includes/search-form-hougarden.php';
@@ -80,7 +90,8 @@ require __DIR__ . '/includes/header-hougarden.php';
 </section>
 
 <section class="hg-section hg-section--locations" aria-labelledby="hg-locations-heading">
-  <h2 class="hg-section__title hg-section__title--page" id="hg-locations-heading">Locations</h2>
+  <div class="hg-section__inner">
+  <h2 class="hg-section__title hg-section__title--page" id="hg-locations-heading">Explore areas</h2>
   <?php if (!$dbOk): ?>
     <p class="hg-empty">Property data is unavailable. Check your database connection in config.</p>
   <?php elseif ($locationCategories === []): ?>
@@ -88,10 +99,13 @@ require __DIR__ . '/includes/header-hougarden.php';
   <?php else: ?>
     <?php require __DIR__ . '/includes/partials/home-location-cards.php'; ?>
   <?php endif; ?>
+  </div>
 </section>
 
 <section class="hg-section hg-section--recommend pb-16" aria-labelledby="hg-recommend-heading">
+  <div class="hg-section__inner">
   <div class="hg-recommend-head">
+    <h2 class="hg-section__title hg-section__title--page" id="hg-recommend-heading">Recommended homes</h2>
     <div class="hg-pill-tabs" role="tablist" aria-label="Listing filters">
       <?php foreach ($feedLabels as $feedKey => $feedLabel): ?>
         <?php
@@ -105,7 +119,6 @@ require __DIR__ . '/includes/header-hougarden.php';
       <?php endforeach; ?>
     </div>
   </div>
-  <h2 class="sr-only" id="hg-recommend-heading"><?= e($feedLabels[$feed] ?? 'Listings') ?></h2>
   <?php if (!$dbOk): ?>
     <p class="hg-empty">Property data is unavailable.</p>
   <?php elseif ($feedListings === []): ?>
@@ -117,6 +130,9 @@ require __DIR__ . '/includes/header-hougarden.php';
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
+  </div>
 </section>
+
+<?php require __DIR__ . '/includes/partials/home-action-cards.php'; ?>
 <?php
 require __DIR__ . '/includes/footer-hougarden.php';

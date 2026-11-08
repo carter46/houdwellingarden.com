@@ -112,8 +112,8 @@ if ((int) ($schemaVer ?? 0) < $targetVer) {
 
 echo "\nHomepage locations (Admin → Homepage locations):\n";
 $legacyRegionSlugs = [
-    'aspen', 'vail', 'beaver-creek', 'telluride', 'snowmass', 'steamboat', 'denver-metro',
-    'phoenix-metro', 'austin-metro', 'central-florida', 'atlanta-metro',
+    'aspen', 'vail', 'beaver-creek', 'telluride', 'snowmass', 'steamboat',
+    'central-florida', 'bellevue-hill', 'rose-bay', 'south-yarra', 'ocean-grove', 'victoria',
 ];
 $badRegions = $pdo->query(
     "SELECT slug, name FROM regions WHERE slug IN ('" . implode("','", $legacyRegionSlugs) . "')"
@@ -136,7 +136,7 @@ $inactiveTypes = (int) $pdo->query(
 if ($inactiveTypes > 0) {
     echo "\nISSUE: Legacy property types still active (estate/ranch/chalet). Run migration v7 or deactivate in admin.\n";
 } else {
-    echo "\nProperty types: AU set OK (legacy estate/ranch/chalet inactive).\n";
+    echo "\nProperty types: OK (legacy estate/ranch/chalet inactive).\n";
 }
 
 echo "\nDone.\n";

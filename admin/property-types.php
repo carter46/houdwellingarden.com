@@ -109,7 +109,7 @@ require dirname(__DIR__) . '/includes/admin-header.php';
           <strong><?= e((string) $row['name']) ?></strong>
           <span class="admin-muted"><?= !empty($row['is_active']) ? 'Active' : 'Inactive' ?> · <?= e((string) taxonomy_type_usage_count((int) $row['id'])) ?> in use</span>
         </span>
-        <span class="material-symbols-outlined admin-accordion-card__chevron" aria-hidden="true">expand_more</span>
+        <?= hg_icon('expand_more', 'admin-accordion-card__chevron') ?>
       </button>
       <div class="admin-accordion-card__body" id="<?= e($cardId) ?>" hidden>
         <div class="admin-accordion-card__details">

@@ -43,16 +43,16 @@ $href = $slug !== '' ? base_url('property.php?slug=' . rawurlencode($slug)) : '#
       <span class="absolute top-4 left-4 bg-primary text-on-primary font-label-sm text-label-sm uppercase tracking-widest px-3 py-1"><?= e($badge) ?></span>
     <?php endif; ?>
     <button type="button" disabled class="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-surface/90 flex items-center justify-center text-primary" aria-label="Save property">
-      <span class="material-symbols-outlined text-[20px]">favorite</span>
+      <?= hg_icon('favorite', '', ['style' => 'width:20px;height:20px']) ?>
     </button>
   </div>
   <div class="p-6">
     <p class="font-display-lg text-[24px] text-on-surface mb-2"><?= e($priceLabel) ?></p>
     <p class="font-subheading text-label-sm uppercase tracking-widest text-on-surface-variant mb-4"><?= e($locationLine) ?></p>
     <div class="flex flex-wrap gap-4 text-on-surface-variant font-body-md text-body-md">
-      <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">bed</span><?= e($beds !== null ? (string) $beds : '—') ?> Beds</span>
-      <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">bathtub</span><?= e($baths !== null ? (string) $baths : '—') ?> Baths</span>
-      <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[18px]">square_foot</span><?= e($sqft !== null ? number_format((int) $sqft) : '—') ?> SqFt</span>
+      <span class="inline-flex items-center gap-1"><?= hg_icon('bed', '', ['style' => 'width:18px;height:18px']) ?><?= e($beds !== null ? (string) $beds : '—') ?> Beds</span>
+      <span class="inline-flex items-center gap-1"><?= hg_icon('bathtub', '', ['style' => 'width:18px;height:18px']) ?><?= e($baths !== null ? (string) $baths : '—') ?> Baths</span>
+      <span class="inline-flex items-center gap-1"><?= hg_icon('square_foot', '', ['style' => 'width:18px;height:18px']) ?><?= e($sqft !== null ? number_format((int) $sqft) : '—') ?> SqFt</span>
     </div>
   </div>
 </article>

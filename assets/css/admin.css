@@ -66,7 +66,7 @@ body.admin-body {
   cursor: pointer;
   flex-shrink: 0;
 }
-.admin-nav-toggle .material-symbols-outlined { font-size: 1.35rem; }
+.admin-nav-toggle .hg-icon { width: 1.35rem; height: 1.35rem; }
 .admin-topbar__title {
   margin: 0;
   flex: 1;
@@ -234,7 +234,7 @@ body.admin-nav-open .admin-nav-backdrop { display: block; }
   font-weight: 600;
   letter-spacing: 0.1em;
 }
-.admin-sidebar__link .material-symbols-outlined { font-size: 1.25rem; font-variation-settings: 'wght' 300; }
+.admin-sidebar__link .hg-icon { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
 .admin-sidebar__link:hover,
 .admin-sidebar__link.is-active { color: var(--primary); background: #f6f3f2; }
 .admin-sidebar__link--exit { margin-top: 1.5rem; border-top: 1px solid rgba(215,193,197,0.4); padding-top: 1.25rem; }

@@ -90,7 +90,7 @@ try {
             'price' => format_price(
                 isset($row['price']) ? (float) $row['price'] : null,
                 !empty($row['price_on_request']),
-                (string) ($row['currency'] ?? 'AUD')
+                (string) ($row['currency'] ?? 'USD')
             ),
         ];
     }

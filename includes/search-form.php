@@ -37,6 +37,6 @@ $price = (string) ($_GET['price'] ?? '');
     </select>
   </div>
   <button type="submit" class="h-12 w-full md:w-12 bg-primary text-on-primary flex items-center justify-center hover:bg-primary-container transition-colors" aria-label="Search">
-    <span class="material-symbols-outlined">search</span>
+    <?= hg_icon('search') ?>
   </button>
 </form>

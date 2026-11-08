@@ -17,20 +17,22 @@ Hard fidelity rules: see [`docs/UI_FIDELITY.md`](docs/UI_FIDELITY.md).
 
 ## Setup (local)
 
-1. Copy `config.local.php.example` → `config.local.php` (local env, DB, `mail.driver=log`).  
-   For production, use `config.local.production.php.example` instead — see [`DEPLOY.md`](DEPLOY.md).
-2. Import the database:
+1. Copy `config.php.example` → `config.php` (required).
+2. Copy `config.local.php.example` → `config.local.php` (local env, DB, `mail.driver=log`).  
+   For production on the server, use `config.local.production.php.example` — see [`DEPLOY.md`](DEPLOY.md).  
+   **`config.php` and `config.local.php` are gitignored** but must exist on every machine that runs the app.
+3. Import the database:
    ```bash
    mysql -u root -p < database/schema.sql
    mysql -u root -p < database/seed.sql
    ```
-3. Install dependencies:
+4. Install dependencies:
    ```bash
    composer install
    ```
    On Hostinger/Git deploys that run Composer automatically, skip committing `vendor/` — the panel installs from `composer.json` (see [`DEPLOY.md`](DEPLOY.md)).
-4. Point the web server document root at this folder.
-5. Checks:
+5. Point the web server document root at this folder.
+6. Checks:
    ```bash
    php bin/smoke.php
    php health.php

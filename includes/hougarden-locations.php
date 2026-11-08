@@ -1,6 +1,6 @@
 <?php
 /**
- * HouGarden AU homepage / search location markets (Admin → Regions).
+ * HouGarden US homepage / search location markets (Admin → Regions).
  *
  * @return list<array{label: string, filter: array<string, string>, image: string}>
  */
@@ -20,11 +20,7 @@ function hougarden_region_search_filter(array $region): array
         return ['market' => $val];
     }
 
-    $slug = strtolower((string) ($region['slug'] ?? ''));
     $name = trim((string) ($region['name'] ?? ''));
-    if ($slug === 'victoria' || strcasecmp($name, 'Victoria') === 0) {
-        return ['market' => 'victoria'];
-    }
     if ($name !== '') {
         return ['location' => $name];
     }
@@ -37,6 +33,11 @@ function hougarden_region_card_image(array $region): string
     $path = trim((string) ($region['image_path'] ?? ''));
     if ($path !== '') {
         if (preg_match('#^https?://#i', $path)) {
+            $rel = ltrim(str_replace('\\', '/', $path), '/');
+            if (is_file(APP_ROOT . '/' . $rel)) {
+                return media_url($rel);
+            }
+
             return $path;
         }
         $rel = ltrim(str_replace('\\', '/', $path), '/');
@@ -48,28 +49,45 @@ function hougarden_region_card_image(array $region): string
     $slug = strtolower((string) preg_replace('/[^a-z0-9]+/', '-', (string) ($region['slug'] ?? '')));
     $slug = trim($slug, '-');
     if ($slug !== '') {
-        foreach (['jpg', 'jpeg', 'webp', 'png'] as $ext) {
-            $candidate = 'uploads/regions/' . $slug . '.' . $ext;
+        foreach (['webp', 'jpg', 'jpeg', 'png'] as $ext) {
+            foreach (['assets/img/regions/' . $slug, 'uploads/regions/' . $slug] as $base) {
+                $candidate = $base . '.' . $ext;
+                if (is_file(APP_ROOT . '/' . $candidate)) {
+                    return media_url($candidate);
+                }
+            }
+        }
+    }
+
+    return hougarden_location_fallback_image((string) ($region['name'] ?? ''), $slug);
+}
+
+function hougarden_location_fallback_image(string $label, string $slug = ''): string
+{
+    $slug = $slug !== '' ? $slug : strtolower((string) preg_replace('/[^a-z0-9]+/', '-', $label));
+    $slug = trim($slug, '-');
+    $slugMap = [
+        'Austin' => 'austin-metro',
+        'Phoenix' => 'phoenix-metro',
+        'Atlanta' => 'atlanta-metro',
+        'Denver' => 'denver-metro',
+        'Chicago' => 'chicago-metro',
+    ];
+    $slug = $slugMap[$label] ?? $slug;
+    if ($slug !== '') {
+        foreach (['webp', 'jpg', 'jpeg', 'png'] as $ext) {
+            $candidate = 'assets/img/regions/' . $slug . '.' . $ext;
             if (is_file(APP_ROOT . '/' . $candidate)) {
                 return media_url($candidate);
             }
         }
     }
 
-    return hougarden_location_fallback_image((string) ($region['name'] ?? ''));
-}
+    if (is_file(APP_ROOT . '/assets/img/hero-home.jpg')) {
+        return media_url('assets/img/hero-home.jpg');
+    }
 
-function hougarden_location_fallback_image(string $label): string
-{
-    $map = [
-        'Bellevue Hill' => 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=800&q=80',
-        'Rose Bay' => 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?auto=format&fit=crop&w=800&q=80',
-        'South Yarra' => 'https://images.unsplash.com/photo-1514395462725-fb8496db94a8?auto=format&fit=crop&w=800&q=80',
-        'Ocean Grove' => 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=800&q=80',
-        'Victoria' => 'https://images.unsplash.com/photo-1519864607624-a07bb8c2477e?auto=format&fit=crop&w=800&q=80',
-    ];
-
-    return $map[$label] ?? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=800&q=80';
+    return '';
 }
 
 /**
@@ -130,29 +148,29 @@ function hougarden_location_markets_fallback(): array
 {
     return [
         [
-            'label' => 'Bellevue Hill',
-            'filter' => ['location' => 'Bellevue Hill'],
-            'image' => hougarden_location_fallback_image('Bellevue Hill'),
+            'label' => 'Austin',
+            'filter' => ['location' => 'Austin'],
+            'image' => hougarden_location_fallback_image('Austin'),
         ],
         [
-            'label' => 'Rose Bay',
-            'filter' => ['location' => 'Rose Bay'],
-            'image' => hougarden_location_fallback_image('Rose Bay'),
+            'label' => 'Phoenix',
+            'filter' => ['location' => 'Phoenix'],
+            'image' => hougarden_location_fallback_image('Phoenix'),
         ],
         [
-            'label' => 'South Yarra',
-            'filter' => ['location' => 'South Yarra'],
-            'image' => hougarden_location_fallback_image('South Yarra'),
+            'label' => 'Atlanta',
+            'filter' => ['location' => 'Atlanta'],
+            'image' => hougarden_location_fallback_image('Atlanta'),
         ],
         [
-            'label' => 'Ocean Grove',
-            'filter' => ['location' => 'Ocean Grove'],
-            'image' => hougarden_location_fallback_image('Ocean Grove'),
+            'label' => 'Denver',
+            'filter' => ['location' => 'Denver'],
+            'image' => hougarden_location_fallback_image('Denver'),
         ],
         [
-            'label' => 'Victoria',
-            'filter' => ['market' => 'victoria'],
-            'image' => hougarden_location_fallback_image('Victoria'),
+            'label' => 'Chicago',
+            'filter' => ['location' => 'Chicago'],
+            'image' => hougarden_location_fallback_image('Chicago'),
         ],
     ];
 }

@@ -19,9 +19,10 @@ Visual reference folder `../references/` is **read-only** and must not be modifi
 
 Copy the `real-estate-app/` tree to the server.
 
-**Do not deploy / commit:**
+**Do not commit (gitignored — create on each machine from `*.example`):**
 
-- `config.local.php` (create on server with production secrets)
+- `config.php` — **required on the server**; copy `config.php.example` → `config.php`, then set `app.url` and DB basics
+- `config.local.php` — optional overrides / secrets (production DB password, mail keys, Smartsupp)
 - `uploads/properties/*` and `uploads/branding/*` contents from another environment unless intentional
 - `storage/logs/*`, `storage/rate_limits/*` runtime files
 - `.git/` (optional)
@@ -34,9 +35,11 @@ Copy the `real-estate-app/` tree to the server.
 
 ## 3. Configuration
 
-1. Copy `config.local.production.php.example` → `config.local.php` on the server  
-   (or start from `config.local.php.example` and switch values to production).
-2. Set at minimum:
+1. Copy `config.php.example` → `config.php` on the server (bootstrap will not run without it).
+2. Copy `config.local.production.php.example` → `config.local.php` on the server  
+   (or start from `config.local.php.example` and switch values to production).  
+   `config.local.php` overrides values in `config.php` when both exist.
+3. Set at minimum:
 
 | Key | Production value |
 |-----|------------------|
@@ -52,7 +55,7 @@ Copy the `real-estate-app/` tree to the server.
 | `security.trust_forwarded_proto` | `true` **only** behind a trusted TLS-terminating proxy |
 | `security.health_token` | Long random string for monitoring |
 
-Committed `config.php` defaults are already production-safe. Secrets belong only in `config.local.php`.
+Keep passwords and API keys in `config.local.php` (or only on the server’s `config.php` if you do not use a local override file). Example templates in git use placeholders only.
 
 After seed, update `settings` via **Admin → Website Settings** (site name, phone, email, logo, favicon). Do not hardcode branding in templates.
 

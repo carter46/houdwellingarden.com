@@ -65,6 +65,7 @@ $footerLocations = hougarden_location_markets();
       </div>
     </footer>
   </div>
+  </div>
 </div>
 <?php require __DIR__ . '/partials/smartsupp.php'; ?>
 </body>

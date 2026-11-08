@@ -1,8 +1,8 @@
 /* HouGarden admin — matches public site (blue brand, clean cards). */
 
 body.admin-body.hougarden-admin {
-  --primary: #079beb;
-  --primary-container: #058cd4;
+  --primary: #006aff;
+  --primary-container: #0056d6;
   --bg: #f5f6f7;
   --surface: #ffffff;
   --on-surface: #20242b;

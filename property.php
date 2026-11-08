@@ -33,6 +33,10 @@ try {
     error_log('[SDC] property detail: ' . $e->getMessage());
 }
 
+if ($property) {
+    $property = property_enrich_listing_agent($property);
+}
+
 if (!$property) {
     http_response_code(404);
     $pageTitle = 'Property not found';
@@ -77,7 +81,7 @@ $inquiryForm = [
     'email' => '',
     'phone' => '',
     'interest' => 'Buy Now',
-    'message' => '',
+    'message' => inquiry_default_property_message($property),
 ];
 
 if (is_post() && ($_POST['form'] ?? '') === 'property_inquiry') {
@@ -115,7 +119,7 @@ if (is_post() && ($_POST['form'] ?? '') === 'property_inquiry') {
                         'email' => '',
                         'phone' => '',
                         'interest' => 'Buy Now',
-                        'message' => '',
+                        'message' => inquiry_default_property_message($property),
                     ];
                 } catch (Throwable $e) {
                     error_log('[SDC] property inquiry: ' . $e->getMessage());

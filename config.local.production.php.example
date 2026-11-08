@@ -1,6 +1,6 @@
 <?php
 /**
- * Copy to config.local.php and fill in. Do not commit config.local.php.
+ * On the server: config.php.example → config.php, then this file → config.local.php. Do not commit either runtime file.
  */
 
 declare(strict_types=1);

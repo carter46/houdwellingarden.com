@@ -1,6 +1,7 @@
 <?php
 /**
- * Copy to config.local.php for local use. Do not commit config.local.php.
+ * Copy config.php.example → config.php first, then copy this file to config.local.php for local overrides.
+ * Do not commit config.php or config.local.php (required on server after deploy).
  */
 
 declare(strict_types=1);
@@ -9,17 +10,17 @@ return [
     'app' => [
         'env' => 'local',
         'debug' => true,
-        'url' => 'http://localhost/real-estate-app',
+        'url' => 'http://127.0.0.1:8765',
         'name' => 'Sunview Development and Consultancy (SDC)',
-        'timezone' => 'America/Denver',
+        'timezone' => 'America/Chicago',
     ],
 
     'db' => [
         'host' => '127.0.0.1',
         'port' => 3306,
-        'name' => 'real_estate',
+        'name' => 'houdwell_local',
         'user' => 'root',
-        'pass' => 'YOUR_DB_PASSWORD',
+        'pass' => '',
         'charset' => 'utf8mb4',
     ],
 

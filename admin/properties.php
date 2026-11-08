@@ -168,7 +168,7 @@ require dirname(__DIR__) . '/includes/admin-header.php';
                     <span class="admin-muted"><?= e(trim(($row['city'] ?? '') . ' ' . ($row['postal_code'] ?? ''))) ?></span>
                     <span class="admin-property-card__price"><?= e($priceLabel) ?></span>
                 </span>
-                <span class="material-symbols-outlined admin-property-card__chevron" aria-hidden="true">expand_more</span>
+                <?= hg_icon('expand_more', 'admin-property-card__chevron') ?>
             </button>
             <div class="admin-property-card__body" id="<?= e($cardId) ?>" hidden>
                 <p class="admin-property-card__meta">

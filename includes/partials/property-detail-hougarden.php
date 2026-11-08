@@ -52,20 +52,20 @@ $enquireHref = $showInquiry ? '#inquiry' : $contactHref;
 
   <div class="hg-prop-stats">
     <div class="hg-prop-stats__item">
-      <span class="material-symbols-outlined">bed</span>
+      <?= hg_icon('bed') ?>
       <span><strong><?= e($property['bedrooms'] !== null ? (string) $property['bedrooms'] : '—') ?></strong> beds</span>
     </div>
     <div class="hg-prop-stats__item">
-      <span class="material-symbols-outlined">shower</span>
+      <?= hg_icon('shower') ?>
       <span><strong><?= e($property['bathrooms'] !== null ? (string) $property['bathrooms'] : '—') ?></strong> baths</span>
     </div>
     <div class="hg-prop-stats__item">
-      <span class="material-symbols-outlined">square_foot</span>
+      <?= hg_icon('square_foot') ?>
       <span><strong><?= e($areaLabel !== '' ? $areaLabel : '—') ?></strong></span>
     </div>
     <?php if ($listedLabel !== ''): ?>
       <div class="hg-prop-stats__item hg-prop-stats__item--listed">
-        <span class="material-symbols-outlined">calendar_today</span>
+        <?= hg_icon('calendar_today') ?>
         <span><?= e($listedLabel) ?></span>
       </div>
     <?php endif; ?>
@@ -130,49 +130,17 @@ $enquireHref = $showInquiry ? '#inquiry' : $contactHref;
       <?php if ($showInquiry): ?>
       <div id="inquiry" class="hg-prop-inquiry hg-panel">
         <h2 class="hg-prop-inquiry__title">Send an enquiry</h2>
-        <?php if ($inquirySuccess): ?>
-          <p class="hg-prop-muted">Thank you — we will be in touch shortly.</p>
-        <?php else: ?>
-          <?php foreach ($inquiryErrors as $err): ?>
-            <p class="hg-prop-error"><?= e($err) ?></p>
-          <?php endforeach; ?>
-          <form method="post" action="#inquiry" class="hg-form-grid">
-            <?= csrf_field() ?>
-            <?= honeypot_field() ?>
-            <input type="hidden" name="form" value="property_inquiry">
-            <div class="hg-form-grid hg-form-grid--2">
-              <div class="hg-field">
-                <label for="inq_first">First name *</label>
-                <input id="inq_first" name="first_name" required value="<?= e($inquiryForm['first_name']) ?>"/>
-              </div>
-              <div class="hg-field">
-                <label for="inq_last">Last name *</label>
-                <input id="inq_last" name="last_name" required value="<?= e($inquiryForm['last_name']) ?>"/>
-              </div>
-            </div>
-            <div class="hg-field">
-              <label for="inq_email">Email *</label>
-              <input id="inq_email" name="email" type="email" required value="<?= e($inquiryForm['email']) ?>"/>
-            </div>
-            <div class="hg-field">
-              <label for="inq_phone">Phone</label>
-              <input id="inq_phone" name="phone" type="tel" value="<?= e($inquiryForm['phone']) ?>"/>
-            </div>
-            <div class="hg-field">
-              <label for="inq_interest">Interest</label>
-              <select id="inq_interest" name="interest">
-                <?php foreach (['Buy Now', 'Request Details', 'General Inquiry'] as $opt): ?>
-                  <option value="<?= e($opt) ?>" <?= $inquiryForm['interest'] === $opt ? 'selected' : '' ?>><?= e($opt) ?></option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-            <div class="hg-field">
-              <label for="inq_message">Message *</label>
-              <textarea id="inq_message" name="message" required><?= e($inquiryForm['message']) ?></textarea>
-            </div>
-            <button type="submit" class="hg-btn">Send enquiry</button>
-          </form>
-        <?php endif; ?>
+        <?php
+          $inquiryIntro = $showAgent && trim((string) ($property['agent_name'] ?? '')) !== ''
+              ? 'Same form as Contact us — pre-filled for this listing. Your message goes to our team and listing agent ' . (string) $property['agent_name'] . '.'
+              : 'Same form as Contact us — pre-filled for this listing. Your message is stored and emailed to our team.';
+          $inquiryFormAction = '#inquiry';
+          $inquiryContext = 'property';
+          $formHidden = 'property_inquiry';
+          $idPrefix = 'inq';
+          $submitLabel = 'Send enquiry';
+          require __DIR__ . '/inquiry-form-hougarden.php';
+        ?>
       </div>
       <?php endif; ?>
     </aside>

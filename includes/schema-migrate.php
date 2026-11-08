@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 function app_schema_target_version(): int
 {
-    return 8;
+    return 10;
 }
 
 function schema_table_exists(PDO $pdo, string $table): bool
@@ -109,7 +109,66 @@ function app_schema_migrations(): array
         6 => 'schema_migrate_v6_default_settings_keys',
         7 => 'schema_migrate_v7_hougarden_home_locations',
         8 => 'schema_migrate_v8_purge_legacy_market_regions',
+        9 => 'schema_migrate_v9_us_home_locations',
+        10 => 'schema_migrate_v10_us_region_local_images',
     ];
+}
+
+function schema_migrate_v10_us_region_local_images(PDO $pdo): void
+{
+    if (!schema_table_exists($pdo, 'regions')) {
+        return;
+    }
+    $rows = [
+        'austin-metro' => 'assets/img/regions/austin-metro.jpg',
+        'phoenix-metro' => 'assets/img/regions/phoenix-metro.jpg',
+        'atlanta-metro' => 'assets/img/regions/atlanta-metro.jpg',
+        'denver-metro' => 'assets/img/regions/denver-metro.jpg',
+        'chicago-metro' => 'assets/img/regions/chicago-metro.jpg',
+    ];
+    $upd = $pdo->prepare('UPDATE regions SET image_path = ? WHERE slug = ?');
+    foreach ($rows as $slug => $path) {
+        if (is_file(APP_ROOT . '/' . $path)) {
+            $upd->execute([$path, $slug]);
+        }
+    }
+}
+
+function schema_migrate_v9_us_home_locations(PDO $pdo): void
+{
+    if (!schema_table_exists($pdo, 'regions')) {
+        return;
+    }
+
+    $removeSlugs = [
+        'bellevue-hill', 'rose-bay', 'south-yarra', 'ocean-grove', 'victoria',
+    ];
+    $placeholders = implode(',', array_fill(0, count($removeSlugs), '?'));
+    $pdo->prepare("DELETE FROM regions WHERE slug IN ($placeholders)")->execute($removeSlugs);
+
+    $locations = [
+        ['austin-metro', 'Austin', 10, 'location', 'Austin', 'https://images.unsplash.com/photo-1531218150217-54595bc27324?auto=format&fit=crop&w=800&q=80'],
+        ['phoenix-metro', 'Phoenix', 20, 'location', 'Phoenix', 'https://images.unsplash.com/photo-1516734215434-ccad973a74fe?auto=format&fit=crop&w=800&q=80'],
+        ['atlanta-metro', 'Atlanta', 30, 'location', 'Atlanta', 'https://images.unsplash.com/photo-1467226632440-45d075e5c8fe?auto=format&fit=crop&w=800&q=80'],
+        ['denver-metro', 'Denver', 40, 'location', 'Denver', 'https://images.unsplash.com/photo-1612892487469-05827b57269b?auto=format&fit=crop&w=800&q=80'],
+        ['chicago-metro', 'Chicago', 50, 'location', 'Chicago', 'https://images.unsplash.com/photo-1494522855154-9297ac83324f?auto=format&fit=crop&w=800&q=80'],
+    ];
+
+    $upsert = $pdo->prepare(
+        'INSERT INTO regions (slug, name, sort_order, is_active, is_featured, image_path, home_filter_key, home_filter_value)
+         VALUES (?, ?, ?, 1, 1, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+           name = VALUES(name),
+           sort_order = VALUES(sort_order),
+           is_active = 1,
+           is_featured = 1,
+           home_filter_key = VALUES(home_filter_key),
+           home_filter_value = VALUES(home_filter_value),
+           image_path = COALESCE(NULLIF(TRIM(regions.image_path), \'\'), VALUES(image_path))'
+    );
+    foreach ($locations as $loc) {
+        $upsert->execute([$loc[0], $loc[1], $loc[2], $loc[5], $loc[3], $loc[4]]);
+    }
 }
 
 function schema_migrate_v8_purge_legacy_market_regions(PDO $pdo): void

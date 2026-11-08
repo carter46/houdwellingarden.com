@@ -209,14 +209,14 @@ function taxonomy_region_save(
             $filterVal = '';
         }
         if ($filterKey === null && $isFeatured) {
-            $filterKey = strcasecmp($name, 'Victoria') === 0 ? 'market' : 'location';
-            $filterVal = $filterKey === 'market' ? 'victoria' : $name;
+            $filterKey = 'location';
+            $filterVal = $name;
         }
         if ($filterKey === 'location' && $filterVal === '') {
             $filterVal = $name;
         }
         if ($filterKey === 'market' && $filterVal === '') {
-            $filterVal = 'victoria';
+            $filterVal = $name;
         }
 
         if (!schema_column_exists(db(), 'regions', 'home_filter_key')) {
@@ -265,14 +265,14 @@ function taxonomy_region_save(
         $filterVal = '';
     }
     if ($filterKey === null && $isFeatured) {
-        $filterKey = strcasecmp($name, 'Victoria') === 0 ? 'market' : 'location';
-        $filterVal = $filterKey === 'market' ? 'victoria' : $name;
+        $filterKey = 'location';
+        $filterVal = $name;
     }
     if ($filterKey === 'location' && $filterVal === '') {
         $filterVal = $name;
     }
     if ($filterKey === 'market' && $filterVal === '') {
-        $filterVal = 'victoria';
+        $filterVal = $name;
     }
 
     if (!schema_column_exists(db(), 'regions', 'home_filter_key')) {

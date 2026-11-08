@@ -38,6 +38,20 @@ function hougarden_use_public_shell(string $activeNavKey, ?string $extraBodyClas
 /**
  * @return list<array{label: string, href: string, icon: string, key: string}>
  */
+/**
+ * @return list<array{label: string, href: string}>
+ */
+function hougarden_topnav_items(): array
+{
+    return [
+        ['label' => 'Buy', 'href' => base_url('properties.php')],
+        ['label' => 'Markets', 'href' => base_url('markets.php')],
+        ['label' => 'Sell', 'href' => base_url('contact.php?subject=' . rawurlencode('Sell / list a property'))],
+        ['label' => 'About', 'href' => base_url('about.php')],
+        ['label' => 'Contact', 'href' => base_url('contact.php')],
+    ];
+}
+
 function hougarden_sidebar_items(): array
 {
     return [

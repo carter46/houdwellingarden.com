@@ -148,7 +148,6 @@ require __DIR__ . '/includes/header-hougarden.php';
   <div class="hg-content-main">
     <div class="hg-panel">
       <h2 class="hg-content-block__title">Send a message</h2>
-      <p class="hg-prop-muted" style="margin:0 0 1.25rem;">Fill in the form and a team member will respond shortly.</p>
 
       <?php if ($linkedProperty): ?>
         <p class="hg-contact-list__label">Regarding</p>
@@ -157,54 +156,18 @@ require __DIR__ . '/includes/header-hougarden.php';
         </p>
       <?php endif; ?>
 
-      <?php if ($success): ?>
-        <div class="hg-success-panel">
-          <span class="material-symbols-outlined">check_circle</span>
-          <h3 class="hg-content-block__title">Inquiry received</h3>
-          <p class="hg-prop-muted">Thank you for reaching out. We will be in touch shortly.</p>
-        </div>
-      <?php else: ?>
-        <?php foreach ($errors as $err): ?>
-          <p class="hg-prop-error"><?= e($err) ?></p>
-        <?php endforeach; ?>
-        <form method="post" action="" class="hg-form-grid">
-          <?= csrf_field() ?>
-          <?= honeypot_field() ?>
-          <div class="hg-form-grid hg-form-grid--2">
-            <div class="hg-field">
-              <label for="first_name">First name *</label>
-              <input id="first_name" name="first_name" required type="text" value="<?= e($form['first_name']) ?>"/>
-            </div>
-            <div class="hg-field">
-              <label for="last_name">Last name *</label>
-              <input id="last_name" name="last_name" required type="text" value="<?= e($form['last_name']) ?>"/>
-            </div>
-          </div>
-          <div class="hg-form-grid hg-form-grid--2">
-            <div class="hg-field">
-              <label for="email">Email *</label>
-              <input id="email" name="email" required type="email" value="<?= e($form['email']) ?>"/>
-            </div>
-            <div class="hg-field">
-              <label for="phone">Phone</label>
-              <input id="phone" name="phone" type="tel" value="<?= e($form['phone']) ?>"/>
-            </div>
-          </div>
-          <div class="hg-field">
-            <label for="interest">Area of interest</label>
-            <select id="interest" name="interest">
-              <?php foreach (['Buying a property', 'Selling a property', 'Rentals', 'General Inquiry', 'Schedule inspection', 'Request Details'] as $opt): ?>
-                <option value="<?= e($opt) ?>" <?= $form['interest'] === $opt ? 'selected' : '' ?>><?= e($opt) ?></option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="hg-field">
-            <label for="message">Message *</label>
-            <textarea id="message" name="message" required><?= e($form['message']) ?></textarea>
-          </div>
-          <button type="submit" class="hg-btn">Send message</button>
-        </form>
-      <?php endif; ?>
+      <?php
+        $inquiryForm = $form;
+        $inquiryErrors = $errors;
+        $inquirySuccess = $success;
+        $inquiryContext = 'contact';
+        $idPrefix = 'contact';
+        $submitLabel = 'Send message';
+        $formHidden = null;
+        $inquiryFormAction = '';
+        $inquiryIntro = 'Fill in the form and a team member will respond shortly.';
+        require __DIR__ . '/includes/partials/inquiry-form-hougarden.php';
+      ?>
     </div>
   </div>
 </div>

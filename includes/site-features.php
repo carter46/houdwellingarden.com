@@ -92,7 +92,7 @@ function faq_groups_public(): array
                 ],
                 [
                     'q' => 'Which areas do you cover?',
-                    'a' => 'Browse by location on the homepage—listings are grouped for Bellevue Hill, Rose Bay, South Yarra, Ocean Grove, and Victoria.',
+                    'a' => 'Browse by location on the homepage—demo inventory is grouped for Austin, Phoenix, Atlanta, Denver, and Chicago.',
                 ],
             ],
         ],
@@ -116,7 +116,7 @@ function about_content_public(): array
 {
     $intro = trim((string) (setting_get('about_intro') ?? ''));
     if ($intro === '') {
-        $intro = site_name() . ' helps buyers and sellers navigate premium Australian property with clear search, location-led discovery, and live inventory backed by MySQL—not static placeholders.';
+        $intro = site_name() . ' helps buyers and sellers explore US homes with clear search, city-led discovery, and live inventory in MySQL. Current listings are labeled demo placeholders until you add real MLS data.';
     }
     $mission = trim((string) (setting_get('about_mission') ?? ''));
     if ($mission === '') {
@@ -142,7 +142,7 @@ function about_content_public(): array
         $stats = [
             ['value' => (string) max($total, 1) . '+', 'label' => 'Live listings'],
             ['value' => '5', 'label' => 'Featured locations'],
-            ['value' => 'AU', 'label' => 'Market focus'],
+            ['value' => 'US', 'label' => 'Market focus'],
             ['value' => '1', 'label' => 'Database source of truth'],
         ];
     }
@@ -152,6 +152,58 @@ function about_content_public(): array
         'mission' => $mission,
         'stats' => $stats,
         'hero_title' => trim((string) (setting_get('about_hero_title') ?? '')) ?: 'Property search, the modern way',
-        'hero_lead' => trim((string) (setting_get('about_hero_lead') ?? '')) ?: 'Local expertise across Sydney and Victoria, with inventory you can trust.',
+        'hero_lead' => trim((string) (setting_get('about_hero_lead') ?? '')) ?: 'Search-led discovery across Austin, Phoenix, Atlanta, Denver, and Chicago—with inventory your team controls in admin.',
+        'pillars' => about_pillars_public(),
+        'cta_title' => trim((string) (setting_get('about_cta_title') ?? '')) ?: 'Ready to explore?',
+        'cta_body' => trim((string) (setting_get('about_cta_body') ?? '')) ?: 'Browse live listings or send a message—our team responds using the contact details in Admin → Settings.',
+    ];
+}
+
+/**
+ * @return list<array{title: string, body: string, icon: string}>
+ */
+function about_pillars_public(): array
+{
+    $raw = trim((string) (setting_get('about_pillars_json') ?? ''));
+    if ($raw !== '') {
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded) && $decoded !== []) {
+            $out = [];
+            foreach ($decoded as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+                $title = trim((string) ($row['title'] ?? ''));
+                $body = trim((string) ($row['body'] ?? ''));
+                if ($title === '' || $body === '') {
+                    continue;
+                }
+                $icon = trim((string) ($row['icon'] ?? 'info'));
+                $out[] = ['title' => $title, 'body' => $body, 'icon' => $icon !== '' ? $icon : 'info'];
+            }
+            if ($out !== []) {
+                return $out;
+            }
+        }
+    }
+
+    $brand = site_name();
+
+    return [
+        [
+            'title' => 'Search-first discovery',
+            'body' => 'Natural-language search, market pages, and filters—every result is pulled from the same MySQL inventory you manage in admin.',
+            'icon' => 'search',
+        ],
+        [
+            'title' => 'City-led markets',
+            'body' => 'Featured US metros on the homepage and region cards you can retitle, re-image, and reorder without touching code.',
+            'icon' => 'location_on',
+        ],
+        [
+            'title' => 'Transparent enquiries',
+            'body' => 'Property and contact forms create inquiry records, notify administrators, and acknowledge clients when mail is configured.',
+            'icon' => 'mail',
+        ],
     ];
 }

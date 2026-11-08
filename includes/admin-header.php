@@ -31,7 +31,7 @@ $user = auth_user();
 <body class="admin-body hougarden-admin">
 <header class="admin-topbar">
     <button type="button" class="admin-nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="admin-sidebar">
-        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        <?= hg_icon('menu') ?>
     </button>
     <p class="admin-topbar__title"><?= e($adminPageTitle) ?></p>
 </header>

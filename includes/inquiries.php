@@ -14,6 +14,61 @@ function inquiry_statuses(): array
 }
 
 /**
+ * Interest dropdown options shared by Contact and property detail enquiry forms.
+ *
+ * @return list<string>
+ */
+function inquiry_interest_options(string $context = 'contact'): array
+{
+    $shared = [
+        'Request Details',
+        'Schedule Tour',
+        'Buy Now',
+        'General Inquiry',
+    ];
+    if ($context === 'property') {
+        return ['Buy Now', 'Request Details', 'Schedule Tour', 'General Inquiry'];
+    }
+
+    return [
+        'Buying a Property',
+        'Selling a Property',
+        'Rentals',
+        ...$shared,
+    ];
+}
+
+/**
+ * Default enquiry message when a visitor opens a listing (editable before send).
+ */
+function inquiry_default_property_message(array $property): string
+{
+    $title = trim((string) ($property['title'] ?? 'this property'));
+    $ref = trim((string) ($property['reference_code'] ?? ''));
+    $city = trim((string) ($property['city'] ?? ''));
+    $state = trim((string) ($property['state'] ?? ''));
+    $loc = trim($city . ($state !== '' ? ', ' . $state : ''));
+    $agent = trim((string) ($property['agent_name'] ?? ''));
+
+    $lines = [
+        'Hello, I would like more information about ' . $title . '.',
+    ];
+    if ($loc !== '') {
+        $lines[] = 'Location: ' . $loc . '.';
+    }
+    if ($ref !== '') {
+        $lines[] = 'Reference: ' . $ref . '.';
+    }
+    if ($agent !== '') {
+        $lines[] = 'Please have ' . $agent . ' or a colleague follow up with available tour times.';
+    } else {
+        $lines[] = 'Please follow up with available tour times and next steps.';
+    }
+
+    return implode("\n", $lines);
+}
+
+/**
  * @param array<string, mixed> $input
  * @return array{ok:bool, errors:list<string>, data:array<string,mixed>}
  */
@@ -61,16 +116,8 @@ function inquiry_validate(array $input, string $type = 'contact'): array
         $errors[] = 'Property is required for this inquiry.';
     }
 
-    $allowedInterest = [
-        '',
-        'Buying a Property',
-        'Selling a Property',
-        'Luxury Rentals',
-        'General Inquiry',
-        'Schedule Tour',
-        'Buy Now',
-        'Request Details',
-    ];
+    $allowedInterest = array_merge([''], inquiry_interest_options('property'), inquiry_interest_options('contact'));
+    $allowedInterest = array_values(array_unique($allowedInterest));
     if (!in_array($interest, $allowedInterest, true)) {
         $interest = 'General Inquiry';
     }

@@ -39,7 +39,7 @@ $faqGroups = faq_groups_public();
           <summary>
             <span><?= e($q) ?></span>
             <span class="hg-faq-item__icon" aria-hidden="true">
-              <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+              <?= hg_icon('add', '', ['style' => 'width:18px;height:18px']) ?>
             </span>
           </summary>
           <div class="hg-faq-item__body"><?= nl2br(e($a)) ?></div>

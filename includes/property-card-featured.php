@@ -53,10 +53,10 @@ if (strlen($description) > 220) {
       <p class="font-body-lg text-body-lg text-on-surface-variant font-light line-clamp-3"><?= e($description) ?></p>
     <?php endif; ?>
     <div class="grid grid-cols-2 gap-3 mt-2 text-on-surface-variant">
-      <span class="inline-flex items-center gap-2"><span class="material-symbols-outlined">bed</span><?= e($beds !== null ? (string) $beds : '—') ?> Beds</span>
-      <span class="inline-flex items-center gap-2"><span class="material-symbols-outlined">bathtub</span><?= e($baths !== null ? (string) $baths : '—') ?> Baths</span>
-      <span class="inline-flex items-center gap-2"><span class="material-symbols-outlined">square_foot</span><?= e($sqft !== null ? number_format((int) $sqft) : '—') ?> Sq Ft</span>
-      <span class="inline-flex items-center gap-2"><span class="material-symbols-outlined">landscape</span><?= e($acres !== null ? (string) $acres : '—') ?> Acres</span>
+      <span class="inline-flex items-center gap-2"><?= hg_icon('bed') ?><?= e($beds !== null ? (string) $beds : '—') ?> Beds</span>
+      <span class="inline-flex items-center gap-2"><?= hg_icon('bathtub') ?><?= e($baths !== null ? (string) $baths : '—') ?> Baths</span>
+      <span class="inline-flex items-center gap-2"><?= hg_icon('square_foot') ?><?= e($sqft !== null ? number_format((int) $sqft) : '—') ?> Sq Ft</span>
+      <span class="inline-flex items-center gap-2"><?= hg_icon('landscape') ?><?= e($acres !== null ? (string) $acres : '—') ?> Acres</span>
     </div>
     <a href="<?= e($href) ?>" class="mt-auto inline-flex items-center justify-center px-8 py-3 bg-primary text-on-primary font-label-sm text-label-sm uppercase tracking-widest hover:bg-primary-container transition-colors">View Details</a>
   </div>
