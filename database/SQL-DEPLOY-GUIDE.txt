@@ -18,7 +18,10 @@ HouGarden — phpMyAdmin deploy (simple)
 
 4. Visit admin/setup.php → create admin password.
 
-5. Done.
+5. Optional: keep images in the 300–400 KB band before zipping:
+     php scripts/optimize-all-public-images.php
+
+6. Done.
 
 Regenerate hougarden-deploy.sql (after you change listings locally)
 --------------------------------------------------------------------

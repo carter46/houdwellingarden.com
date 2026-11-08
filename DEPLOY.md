@@ -200,7 +200,10 @@ Optional later hardening (not required to go live):
 - [ ] Brevo API key set (`mail.driver=brevo`); test inquiry email (and PHP mail fallback if needed)
 - [ ] `uploads/` cannot execute PHP
 - [ ] `database/`, `storage/`, `vendor/`, `bin/`, `config.local.php` not publicly readable
-- [ ] `robots.txt` disallows `/admin/`
+- [ ] `robots.txt` disallows `/admin/` (or `robots.php` via `.htaccess` with dynamic `Sitemap:` line)
+- [ ] `app.url` in `config.php` matches live HTTPS domain (canonical URLs + sitemap)
+- [ ] Submit `https://YOURDOMAIN/sitemap.php` in Google Search Console
+- [ ] Admin → Settings: site name, logo, favicon, optional search description filled in
 - [ ] Admin setup completed; bookmark removed from public marketing if desired
 - [ ] Backups: MySQL dump + `uploads/properties/`
 

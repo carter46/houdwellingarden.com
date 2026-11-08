@@ -74,6 +74,7 @@ require_once APP_ROOT . '/includes/security_headers.php';
 require_once APP_ROOT . '/includes/db.php';
 require_once APP_ROOT . '/includes/settings.php';
 require_once APP_ROOT . '/includes/site-features.php';
+require_once APP_ROOT . '/includes/seo.php';
 require_once APP_ROOT . '/includes/visibility.php';
 require_once APP_ROOT . '/includes/csrf.php';
 require_once APP_ROOT . '/includes/rate_limit.php';

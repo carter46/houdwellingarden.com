@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
+require_once dirname(__DIR__) . '/includes/image-optimize.php';
 require_once __DIR__ . '/lib-http-fetch.php';
 
 $refreshAll = in_array('--all', $argv ?? [], true);
@@ -87,6 +88,7 @@ foreach ($props as $i => $row) {
         continue;
     }
     file_put_contents($dest, $bin);
+    property_image_optimize_file($dest);
     if ($refreshAll) {
         $delAll->execute([$id]);
     } else {

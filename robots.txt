@@ -1,10 +1,17 @@
+# Served by robots.php when mod_rewrite is enabled (dynamic Sitemap URL).
+# If your host ignores .htaccess, open robots.php in the browser and paste into Search Console,
+# or replace this file with the output of: php -r "require 'includes/bootstrap.php'; echo seo_robots_txt_body();"
+
 User-agent: *
 Disallow: /admin/
+Disallow: /api/
 Disallow: /storage/
 Disallow: /database/
 Disallow: /vendor/
 Disallow: /bin/
+Disallow: /docs/
+Disallow: /check.php
+Disallow: /health.php
 Disallow: /config.php
 Disallow: /config.local.php
-Disallow: /health.php
 Allow: /

@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
+require_once dirname(__DIR__) . '/includes/image-optimize.php';
 require_once __DIR__ . '/lib-http-fetch.php';
 
 $force = in_array('--force', $argv ?? [], true);
@@ -43,6 +44,7 @@ foreach ($map as $slug => $url) {
             continue;
         }
         file_put_contents($dest, $bin);
+        property_image_optimize_file($dest, null, null, site_marketing_image_max_edge());
         echo "Wrote {$rel}\n";
         foreach (['webp', 'png', 'jpeg'] as $old) {
             $legacy = APP_ROOT . '/assets/img/regions/' . $slug . '.' . $old;
@@ -67,6 +69,7 @@ if ($force || !is_file($heroDest) || filesize($heroDest) < 2000) {
     $bin = http_fetch_binary($heroUrl);
     if ($bin !== null) {
         file_put_contents($heroDest, $bin);
+        property_image_optimize_file($heroDest, null, null, site_hero_image_max_edge());
         echo "Wrote {$heroRel} (hero background)\n";
     }
 }

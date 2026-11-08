@@ -17,6 +17,7 @@ $pageTitle = $pageTitle ?? site_name();
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title><?= e($pageTitle) ?></title>
+<?php require __DIR__ . '/partials/seo-public-head.php'; ?>
 <?php
 $favicon = site_favicon_url();
 if ($favicon !== ''):

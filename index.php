@@ -10,6 +10,7 @@ require_once __DIR__ . '/includes/hougarden-shell.php';
 require_once __DIR__ . '/includes/hougarden-locations.php';
 
 $pageTitle = site_name() . ' — US homes for sale';
+$pageDescription = seo_site_description();
 hougarden_use_public_shell('home', 'hougarden-home');
 
 $feed = (string) ($_GET['feed'] ?? 'recommend');

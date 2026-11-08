@@ -113,6 +113,7 @@ if (is_post()) {
             $aboutCtaTitle = trim((string) ($_POST['about_cta_title'] ?? ''));
             $aboutCtaBody = trim((string) ($_POST['about_cta_body'] ?? ''));
             $defaultAgentId = max(0, (int) ($_POST['default_agent_id'] ?? 0));
+            $seoMetaDescription = trim((string) ($_POST['seo_meta_description'] ?? ''));
             $faqJson = trim((string) ($_POST['faq_json'] ?? ''));
 
             if ($aboutStatsJson !== '') {
@@ -154,6 +155,7 @@ if (is_post()) {
                 setting_set('about_cta_title', $aboutCtaTitle !== '' ? $aboutCtaTitle : null);
                 setting_set('about_cta_body', $aboutCtaBody !== '' ? $aboutCtaBody : null);
                 setting_set('default_agent_id', $defaultAgentId > 0 ? (string) $defaultAgentId : null);
+                setting_set('seo_meta_description', $seoMetaDescription !== '' ? $seoMetaDescription : null);
                 setting_set('faq_json', $faqJson !== '' ? $faqJson : null);
 
                 if (!empty($_FILES['logo']['name'])) {
@@ -210,6 +212,12 @@ require dirname(__DIR__) . '/includes/admin-header.php';
   <div class="admin-field">
     <label for="site_name">Site name *</label>
     <input id="site_name" name="site_name" required maxlength="191" value="<?= e(site_name()) ?>">
+    <p class="admin-note">Used in page titles, Open Graph, and JSON-LD so search engines show your brand name.</p>
+  </div>
+  <div class="admin-field">
+    <label for="seo_meta_description">Search description (meta)</label>
+    <textarea id="seo_meta_description" name="seo_meta_description" rows="2" maxlength="320" placeholder="Short summary for Google (about 150 characters)."><?= e((string) (setting_get('seo_meta_description') ?? '')) ?></textarea>
+    <p class="admin-note">Homepage &amp; default sharing text. Leave blank to use the About intro.</p>
   </div>
   <div class="admin-field">
     <label for="mail_from_name">Email display name</label>

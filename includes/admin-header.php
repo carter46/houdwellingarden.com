@@ -8,6 +8,8 @@
 
 declare(strict_types=1);
 
+seo_admin_block_indexing();
+
 $adminPageTitle = $adminPageTitle ?? 'Admin';
 $adminActiveNav = $adminActiveNav ?? 'overview';
 $appName = site_name();
@@ -18,6 +20,7 @@ $user = auth_user();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow,noarchive">
     <title><?= e($adminPageTitle) ?> — <?= e($appName) ?></title>
     <?php $favicon = site_favicon_url(); if ($favicon !== ''): ?>
     <link rel="icon" href="<?= e($favicon) ?>">

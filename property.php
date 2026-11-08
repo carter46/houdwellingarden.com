@@ -11,7 +11,8 @@ require_once __DIR__ . '/includes/hougarden-shell.php';
 $slug = trim((string) ($_GET['slug'] ?? ''));
 if ($slug === '') {
     http_response_code(404);
-    $pageTitle = 'Property not found';
+    $pageTitle = 'Property not found — ' . site_name();
+    $pageMetaRobots = 'noindex,follow';
     $activeNav = 'properties';
     hougarden_use_public_shell('search');
     require __DIR__ . '/includes/header-hougarden.php';
@@ -39,7 +40,8 @@ if ($property) {
 
 if (!$property) {
     http_response_code(404);
-    $pageTitle = 'Property not found';
+    $pageTitle = 'Property not found — ' . site_name();
+    $pageMetaRobots = 'noindex,follow';
     $activeNav = 'properties';
     hougarden_use_public_shell('search');
     require __DIR__ . '/includes/header-hougarden.php';
@@ -132,6 +134,24 @@ if (is_post() && ($_POST['form'] ?? '') === 'property_inquiry') {
 
 $coverUrl = $cover !== '' ? media_url($cover) : '';
 $contactHref = base_url('contact.php?property=' . rawurlencode((string) $property['slug']));
+
+$descRaw = property_public_description($property);
+$pageDescription = $descRaw !== ''
+    ? seo_truncate_description($descRaw)
+    : seo_truncate_description(
+        (string) $property['title'] . ' for sale in ' . trim((string) ($property['city'] ?? '') . ', ' . (string) ($property['state'] ?? '')) . ' — ' . site_name()
+    );
+$pageOgType = 'article';
+$pageOgImage = $coverUrl !== ''
+    ? (str_starts_with($coverUrl, 'http') ? $coverUrl : absolute_url(ltrim($coverUrl, '/')))
+    : null;
+$seoJsonLdExtra = [
+    seo_jsonld_listing(
+        $property,
+        absolute_url('property.php?slug=' . rawurlencode((string) $property['slug'])),
+        is_string($pageOgImage) ? $pageOgImage : ''
+    ),
+];
 
 require __DIR__ . '/includes/header-hougarden.php';
 require __DIR__ . '/includes/partials/property-detail-hougarden.php';

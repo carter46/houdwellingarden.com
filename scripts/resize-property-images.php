@@ -1,6 +1,6 @@
 <?php
 /**
- * Resize/compress property images over the configured max (default 400 KB).
+ * Resize/compress property images over the configured max (default 400 KB, band 300–400 KB).
  * Usage: php scripts/resize-property-images.php [--dry-run]
  */
 

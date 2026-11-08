@@ -55,6 +55,15 @@ $config = [
         'key' => '',
     ],
 
+    // Public image delivery (admin uploads + optimize scripts use these caps).
+    'uploads' => [
+        'property_image_min_bytes' => 300 * 1024,
+        'property_image_max_bytes' => 400 * 1024,
+        'property_image_max_edge' => 2560,
+        'marketing_image_max_edge' => 1600,
+        'hero_image_max_edge' => 1920,
+    ],
+
     'admin' => [
         'setup_enabled' => false,
         'password_reset_enabled' => false,

@@ -12,7 +12,19 @@ function property_image_max_bytes(): int
 
 function property_image_min_bytes(): int
 {
-    return (int) app_config('uploads.property_image_min_bytes', 200 * 1024);
+    return (int) app_config('uploads.property_image_min_bytes', 300 * 1024);
+}
+
+/** @return int JPEG/WebP long-edge cap for static marketing assets (regions, hero). */
+function site_marketing_image_max_edge(): int
+{
+    return (int) app_config('uploads.marketing_image_max_edge', 1600);
+}
+
+/** @return int Long edge for homepage hero photo. */
+function site_hero_image_max_edge(): int
+{
+    return (int) app_config('uploads.hero_image_max_edge', 1920);
 }
 
 /**
@@ -201,18 +213,27 @@ function property_image_best_encoding_under_limit(\GdImage $img, int $maxBytes, 
  *
  * @return array{ok:bool, changed:bool, before:int, after:int, message:string, path:string}
  */
-function property_image_optimize_file(string $absolutePath, ?int $maxBytes = null, ?int $minBytes = null): array
-{
+function property_image_optimize_file(
+    string $absolutePath,
+    ?int $maxBytes = null,
+    ?int $minBytes = null,
+    ?int $maxLongEdge = null,
+): array {
     $maxBytes ??= property_image_max_bytes();
     $minBytes ??= property_image_min_bytes();
+    $maxLongEdge ??= (int) app_config('uploads.property_image_max_edge', 2560);
 
     if (!is_file($absolutePath)) {
         return ['ok' => false, 'changed' => false, 'before' => 0, 'after' => 0, 'message' => 'File not found', 'path' => $absolutePath];
     }
 
     $before = (int) filesize($absolutePath);
-    if ($before <= $maxBytes) {
+    if ($before <= $maxBytes && $before >= $minBytes) {
         return ['ok' => true, 'changed' => false, 'before' => $before, 'after' => $before, 'message' => 'Already within limit', 'path' => $absolutePath];
+    }
+    if ($before <= $maxBytes && $before < $minBytes) {
+        // Small files are left as-is (e.g. thumbnails).
+        return ['ok' => true, 'changed' => false, 'before' => $before, 'after' => $before, 'message' => 'Under minimum band but acceptable', 'path' => $absolutePath];
     }
 
     if (!extension_loaded('gd')) {
@@ -224,7 +245,7 @@ function property_image_optimize_file(string $absolutePath, ?int $maxBytes = nul
         return ['ok' => false, 'changed' => false, 'before' => $before, 'after' => $before, 'message' => 'Could not load image', 'path' => $absolutePath];
     }
 
-    $img = property_image_cap_long_edge($img, 2560);
+    $img = property_image_cap_long_edge($img, max(640, $maxLongEdge));
     $ext = strtolower(pathinfo($absolutePath, PATHINFO_EXTENSION));
 
     $candidates = [];
