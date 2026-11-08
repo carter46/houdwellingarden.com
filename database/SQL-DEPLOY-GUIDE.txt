@@ -13,7 +13,8 @@ HouGarden — phpMyAdmin deploy (simple)
    If phpMyAdmin says "Unexpected beginning" or error near position 0: re-download
    hougarden-deploy.sql from your project (we strip UTF-8 BOM; Word/OneDrive can re-add it).
 
-3. Set MySQL credentials in config.php or config.local.php on the server.
+3. Set MySQL credentials in config.php or config.local.php on the server
+   (templates: docs/config-examples/ — not config.*.example in the site root).
 
 4. Visit admin/setup.php → create admin password.
 

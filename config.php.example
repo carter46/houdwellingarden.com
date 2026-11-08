@@ -4,7 +4,7 @@
  *
  * Setup:
  *   1. Copy this file to config.php (gitignored — never commit config.php).
- *   2. Optionally copy config.local.production.php.example → config.local.php for secrets/overrides.
+ *   2. Optionally copy docs/config-examples/config.local.production.php.example → config.local.php for secrets.
  *
  * Bootstrap always loads config.php. When config.local.php exists, its values override this file.
  */

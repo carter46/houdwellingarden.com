@@ -1,0 +1,19 @@
+HouGarden — files that belong in the PUBLIC site root on InfinityFree
+======================================================================
+
+REQUIRED
+  config.php              (from config.php.example — DB + app.url)
+  index.php, property.php, … (all app PHP)
+  assets/, uploads/properties/hg-*, includes/, admin/, …
+
+OPTIONAL
+  config.local.php        (secrets / overrides — gitignored)
+  config.php.example      (reference only; safe to delete on host)
+
+REMOVE if present (leftover from old deploys — not needed on the server)
+  config.local.php.example
+  config.local.production.php.example
+  config.infinityfree.php.example
+
+Developer-only templates are in docs/config-examples/ — you may omit
+the whole docs/ folder from upload zips if you want a smaller host tree.

@@ -1,7 +1,7 @@
 <?php
 /**
- * Copy config.php.example → config.php first, then copy this file to config.local.php for local overrides.
- * Do not commit config.php or config.local.php (required on server after deploy).
+ * Dev/local: copy to the site root as config.local.php (see docs/config-examples/README.txt).
+ * Server needs config.php; optional config.local.php — not this .example file.
  */
 
 declare(strict_types=1);

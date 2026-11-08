@@ -58,7 +58,7 @@ if (!empty($_SERVER['HTTP_HOST']) && !preg_match('/^(localhost|127\.0\.0\.1)(:\d
     if ($dbHost === '127.0.0.1' || $dbUser === 'root') {
         echo "\nWARNING: Database still uses local defaults (127.0.0.1 / root).\n";
         echo "If you edited config.php on the server, config.local.php from your PC may be overriding it.\n";
-        echo "Fix: delete or replace config.local.php on the server, or use config.infinityfree.php.example.\n";
+        echo "Fix: delete or replace config.local.php on the server; see docs/config-examples/config.infinityfree.php.example on your PC.\n";
     }
 }
 

@@ -1,6 +1,7 @@
 <?php
 /**
- * On the server: config.php.example → config.php, then this file → config.local.php. Do not commit either runtime file.
+ * Production secrets template: copy contents to site root config.local.php once.
+ * Keep this file on your PC or in docs/ — do not leave copies in the public site root on the host.
  */
 
 declare(strict_types=1);

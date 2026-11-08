@@ -7,11 +7,9 @@
 /config.php.bak
 /config.local.php.bak
 /config.local.production.php.bak
-# Templates committed for copy-paste only:
+# Config templates (site root keeps only config.php.example for deploy reference):
 !/config.php.example
-!/config.local.php.example
-!/config.local.production.php.example
-!/config.infinityfree.php.example
+# Local/production/InfinityFree templates live under docs/config-examples/ (omit docs/ from host zip if desired)
 
 # Composer dependencies — installed by the host on deploy (composer install)
 /vendor/

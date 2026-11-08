@@ -18,8 +18,8 @@ Hard fidelity rules: see [`docs/UI_FIDELITY.md`](docs/UI_FIDELITY.md).
 ## Setup (local)
 
 1. Copy `config.php.example` → `config.php` (required).
-2. Copy `config.local.php.example` → `config.local.php` (local env, DB, `mail.driver=log`).  
-   For production on the server, use `config.local.production.php.example` — see [`DEPLOY.md`](DEPLOY.md).  
+2. Copy `docs/config-examples/config.local.php.example` → `config.local.php` (local env, DB, `mail.driver=log`).  
+   For production on the server, use `docs/config-examples/config.local.production.php.example` — see [`DEPLOY.md`](DEPLOY.md).  
    **`config.php` and `config.local.php` are gitignored** but must exist on every machine that runs the app.
 3. Import the database:
    ```bash

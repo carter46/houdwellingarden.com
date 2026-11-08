@@ -2,7 +2,7 @@
 Options -Indexes
 
 <IfModule mod_authz_core.c>
-  <FilesMatch "(?i)^(config\.php|config\.local\.php|composer\.(json|lock)|composer\.phar|\.env.*|.*\.md)$">
+  <FilesMatch "(?i)^(config\.php|config\.local\.php|config\.(local|local\.production|infinityfree)\.php\.example|composer\.(json|lock)|composer\.phar|\.env.*|.*\.md)$">
     Require all denied
   </FilesMatch>
 </IfModule>

@@ -1,11 +1,7 @@
 <?php
 /**
- * InfinityFree / .gt.tc deploy (same idea as trust-offshore config.php).
- *
- * Option A — like trust-offshore: edit db.* directly in config.php on the server.
- * Option B — copy this file to config.local.php on the server only (do NOT upload your PC config.local.php).
- *
- * MySQL host is NEVER 127.0.0.1 on InfinityFree — use the sql###.infinityfree.com host from the panel.
+ * InfinityFree / .gt.tc — copy values into site root config.php or config.local.php.
+ * MySQL host is NEVER 127.0.0.1 on InfinityFree — use sql###.infinityfree.com from the panel.
  */
 
 declare(strict_types=1);

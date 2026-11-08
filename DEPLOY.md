@@ -19,10 +19,12 @@ Visual reference folder `../references/` is **read-only** and must not be modifi
 
 Copy the `real-estate-app/` tree to the server.
 
-**Do not commit (gitignored — create on each machine from `*.example`):**
+**Do not commit (gitignored — create on each machine from templates):**
 
 - `config.php` — **required on the server**; copy `config.php.example` → `config.php`, then set `app.url` and DB basics
 - `config.local.php` — optional overrides / secrets (production DB password, mail keys, Smartsupp)
+
+**Production site root should NOT include** `config.local.php.example`, `config.local.production.php.example`, or `config.infinityfree.php.example` (those templates live in `docs/config-examples/` for developers only). After an old deploy, delete any stray `config.*.example` files from the host except optional `config.php.example`.
 - `uploads/properties/*` and `uploads/branding/*` contents from another environment unless intentional
 - `storage/logs/*`, `storage/rate_limits/*` runtime files
 - `.git/` (optional)
@@ -36,9 +38,10 @@ Copy the `real-estate-app/` tree to the server.
 ## 3. Configuration
 
 1. Copy `config.php.example` → `config.php` on the server (bootstrap will not run without it).
-2. Copy `config.local.production.php.example` → `config.local.php` on the server  
-   (or start from `config.local.php.example` and switch values to production).  
-   `config.local.php` overrides values in `config.php` when both exist.
+2. Copy `docs/config-examples/config.local.production.php.example` → `config.local.php` in the site root on the server  
+   (or start from `docs/config-examples/config.local.php.example` for local dev).  
+   `config.local.php` overrides values in `config.php` when both exist.  
+   InfinityFree DB sample: `docs/config-examples/config.infinityfree.php.example`.
 3. Set at minimum:
 
 | Key | Production value |
