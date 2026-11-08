@@ -321,23 +321,16 @@
 }
 
 .hg-brand-img--topnav {
-  height: 2.35rem;
-  max-width: 12.5rem;
+  height: 3rem;
+  max-width: 17rem;
   width: auto;
 }
 
 .hg-brand-img--mobile,
 .hg-brand-img--mobile-drawer {
-  height: 2rem;
-  max-width: 10.5rem;
+  height: 2.5rem;
+  max-width: 13rem;
   width: auto;
-}
-
-.hg-brand-img--sidebar {
-  max-height: 2.35rem;
-  max-width: 3rem;
-  width: auto;
-  height: auto;
 }
 
 .hg-topnav__brand--logo,
@@ -350,12 +343,6 @@
   font-weight: 700;
 }
 
-.hg-sidebar__logo--image {
-  width: auto;
-  max-width: 3.25rem;
-  height: auto;
-  min-height: 2.5rem;
-}
 
 .hg-topnav__end {
   flex: 1;

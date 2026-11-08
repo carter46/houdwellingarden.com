@@ -69,7 +69,7 @@ require __DIR__ . '/stitch-head.php';
   <div class="hg-app__frame">
   <aside class="hg-sidebar" aria-label="Site menu">
     <div class="hg-sidebar__top">
-      <a class="hg-sidebar__logo<?= site_has_logo() ? ' hg-sidebar__logo--image' : '' ?>" href="<?= e(base_url('index.php')) ?>" aria-label="<?= e(site_name()) ?>">
+      <a class="hg-sidebar__logo" href="<?= e(base_url('index.php')) ?>" aria-label="<?= e(site_name()) ?>">
         <?php $brandSlot = 'sidebar'; require __DIR__ . '/partials/site-brand.php'; ?>
       </a>
       <nav class="hg-sidebar__nav">
