@@ -22,9 +22,8 @@ require __DIR__ . '/stitch-head.php';
           <a class="hg-topnav__link" href="<?= e((string) $item['href']) ?>"><?= e((string) $item['label']) ?></a>
         <?php endforeach; ?>
       </nav>
-      <a class="hg-topnav__brand" href="<?= e(base_url('index.php')) ?>">
-        <span class="hg-topnav__brand-mark" aria-hidden="true"><?= e(substr(site_name_short(), 0, 1)) ?></span>
-        <span class="hg-topnav__brand-text"><?= e(site_name_short()) ?></span>
+      <a class="hg-topnav__brand<?= site_has_logo() ? ' hg-topnav__brand--logo' : '' ?>" href="<?= e(base_url('index.php')) ?>">
+        <?php $brandSlot = 'topnav'; require __DIR__ . '/partials/site-brand.php'; ?>
       </a>
       <div class="hg-topnav__end">
         <a class="hg-topnav__link hg-topnav__link--quiet" href="<?= e(base_url('admin/login.php')) ?>">Sign in</a>
@@ -32,9 +31,8 @@ require __DIR__ . '/stitch-head.php';
       </div>
     </div>
     <div class="hg-mobile-bar lg:hidden">
-      <a href="<?= e(base_url('index.php')) ?>" class="hg-mobile-bar__brand">
-        <span class="hg-mobile-bar__logo">h</span>
-        <?= e(site_name_short()) ?>
+      <a href="<?= e(base_url('index.php')) ?>" class="hg-mobile-bar__brand<?= site_has_logo() ? ' hg-mobile-bar__brand--logo' : '' ?>">
+        <?php $brandSlot = 'mobile'; require __DIR__ . '/partials/site-brand.php'; ?>
       </a>
       <input type="checkbox" id="hg-mobile-nav" class="sr-only" autocomplete="off"/>
       <label for="hg-mobile-nav" class="hg-mobile-bar__menu" aria-label="Open menu"><?= hg_icon('menu', 'hg-icon--lg') ?></label>
@@ -42,9 +40,8 @@ require __DIR__ . '/stitch-head.php';
         <label for="hg-mobile-nav" class="hg-mobile-drawer__backdrop" aria-hidden="true"></label>
         <div class="hg-mobile-drawer__panel">
           <div class="hg-mobile-drawer__head">
-            <a href="<?= e(base_url('index.php')) ?>" class="hg-mobile-drawer__brand">
-              <span class="hg-mobile-bar__logo">h</span>
-              <?= e(site_name_short()) ?>
+            <a href="<?= e(base_url('index.php')) ?>" class="hg-mobile-drawer__brand<?= site_has_logo() ? ' hg-mobile-drawer__brand--logo' : '' ?>">
+              <?php $brandSlot = 'mobile-drawer'; require __DIR__ . '/partials/site-brand.php'; ?>
             </a>
             <label for="hg-mobile-nav" class="hg-mobile-drawer__close" aria-label="Close menu"><?= hg_icon('close') ?></label>
           </div>
@@ -72,8 +69,8 @@ require __DIR__ . '/stitch-head.php';
   <div class="hg-app__frame">
   <aside class="hg-sidebar" aria-label="Site menu">
     <div class="hg-sidebar__top">
-      <a class="hg-sidebar__logo" href="<?= e(base_url('index.php')) ?>" aria-label="<?= e(site_name()) ?>">
-        <span class="hg-sidebar__logo-mark">h</span>
+      <a class="hg-sidebar__logo<?= site_has_logo() ? ' hg-sidebar__logo--image' : '' ?>" href="<?= e(base_url('index.php')) ?>" aria-label="<?= e(site_name()) ?>">
+        <?php $brandSlot = 'sidebar'; require __DIR__ . '/partials/site-brand.php'; ?>
       </a>
       <nav class="hg-sidebar__nav">
         <?php foreach ($sidebarItems as $item): ?>

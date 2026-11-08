@@ -314,6 +314,49 @@
   letter-spacing: -0.02em;
 }
 
+.hg-brand-img {
+  display: block;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.hg-brand-img--topnav {
+  height: 2.35rem;
+  max-width: 12.5rem;
+  width: auto;
+}
+
+.hg-brand-img--mobile,
+.hg-brand-img--mobile-drawer {
+  height: 2rem;
+  max-width: 10.5rem;
+  width: auto;
+}
+
+.hg-brand-img--sidebar {
+  max-height: 2.35rem;
+  max-width: 3rem;
+  width: auto;
+  height: auto;
+}
+
+.hg-topnav__brand--logo,
+.hg-mobile-bar__brand--logo,
+.hg-mobile-drawer__brand--logo {
+  gap: 0;
+}
+
+.hg-mobile-bar__name {
+  font-weight: 700;
+}
+
+.hg-sidebar__logo--image {
+  width: auto;
+  max-width: 3.25rem;
+  height: auto;
+  min-height: 2.5rem;
+}
+
 .hg-topnav__end {
   flex: 1;
   display: flex;

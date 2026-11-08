@@ -23,6 +23,7 @@ $favicon = site_favicon_url();
 if ($favicon !== ''):
 ?>
 <link rel="icon" href="<?= e($favicon) ?>"/>
+<link rel="apple-touch-icon" href="<?= e($favicon) ?>"/>
 <?php endif; ?>
 <style>
 @layer base {

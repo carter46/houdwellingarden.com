@@ -97,13 +97,29 @@ function site_has_logo(): bool
     return site_logo_path() !== '';
 }
 
+function site_branding_asset_url(string $relativePath): string
+{
+    $relativePath = ltrim(str_replace('\\', '/', $relativePath), '/');
+    if ($relativePath === '' || str_contains($relativePath, '..')) {
+        return '';
+    }
+
+    $local = APP_ROOT . '/' . $relativePath;
+    if (is_file($local)) {
+        return asset_url($relativePath);
+    }
+
+    return media_url($relativePath);
+}
+
 function site_logo_url(): string
 {
     $path = site_logo_path();
     if ($path === '') {
-        $path = 'assets/img/logo-sdc.svg';
+        return site_branding_asset_url('assets/img/logo-sdc.svg');
     }
-    return media_url($path);
+
+    return site_branding_asset_url($path);
 }
 
 function site_favicon_path(): ?string
@@ -115,5 +131,12 @@ function site_favicon_path(): ?string
 function site_favicon_url(): string
 {
     $path = site_favicon_path();
-    return $path !== null ? media_url($path) : '';
+    if ($path !== null && $path !== '') {
+        return site_branding_asset_url($path);
+    }
+    if (is_file(APP_ROOT . '/assets/img/favicon.jpg')) {
+        return site_branding_asset_url('assets/img/favicon.jpg');
+    }
+
+    return '';
 }
